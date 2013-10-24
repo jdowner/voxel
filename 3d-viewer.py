@@ -20,6 +20,8 @@ def main():
     glutIdleFunc(a.display)
     glutReshapeFunc(a.resize)
     glutKeyboardFunc(a.keyboard)
+    glutMouseFunc(a.mouse_press)
+    glutMotionFunc(a.mouse_move)
 
     glutMainLoop()
 

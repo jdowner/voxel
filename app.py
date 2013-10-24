@@ -38,3 +38,8 @@ class App(object):
         if args[0] == '\x1b':
             sys.exit()
 
+    def mouse_move(self, *args):
+        print(args)
+
+    def mouse_press(self, *args):
+        print(args)
