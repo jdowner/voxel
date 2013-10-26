@@ -1,5 +1,15 @@
 #!/usr/bin/python2
 
+import sys
+
+from OpenGL.GL import (
+        glGetString,
+        GL_RENDERER,
+        GL_VERSION,
+        GL_VENDOR,
+        GL_EXTENSIONS,
+        )
+
 from OpenGL.GLUT import *
 
 import core
@@ -22,6 +32,15 @@ def main():
     glutKeyboardFunc(a.keyboard)
     glutMouseFunc(a.mouse_press)
     glutMotionFunc(a.mouse_move)
+
+    for arg in sys.argv:
+        if arg in ('-i', '--info'):
+            print("GL_RENDERER   = %s" % (glGetString(GL_RENDERER),))
+            print("GL_VERSION    = %s" % (glGetString(GL_VERSION),))
+            print("GL_VENDOR     = %s" % (glGetString(GL_VENDOR),))
+            print("GL_EXTENSIONS = ")
+            for ext in sorted(glGetString(GL_EXTENSIONS).split()):
+                print("  %s" % (ext,))
 
     glutMainLoop()
 
