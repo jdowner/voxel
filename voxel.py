@@ -23,7 +23,7 @@ def main():
     glutInitWindowSize(800, 600)
     glutInitWindowPosition(0, 0)
 
-    window = glutCreateWindow("--3d-Viewer--")
+    window = glutCreateWindow("--VOXEL--")
     a = app.App()
 
     glutDisplayFunc(a.display)
