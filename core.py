@@ -12,7 +12,6 @@ from OpenGL.GLUT import *
 # PyOpenGL 3.0.1 introduces this convenience module...
 import OpenGL.GL.shaders as glsl
 
-
 LOGLEVEL = {
         'debug':    logging.DEBUG,
         'info':     logging.INFO,
@@ -69,6 +68,7 @@ class Renderer(object):
         self._program = program
         self._voxels = []
         self._vbo_voxels = None
+        self._program.light_position = (200,200,0)
 
         glClearColor(0.2, 0.2, 0.2, 1.0)
 
