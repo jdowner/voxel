@@ -115,16 +115,18 @@ class Renderer(object):
         glValidateProgram(self._program)
 
 
-    def resize(self, width, height):
+    def set_viewport(self, width, height):
         assert width > 0
         assert height > 0
 
         glViewport(0, 0, width, height)
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
-        glOrtho(0, width, 0, height, 0, 100)
+        glFrustum(0, width, height, 0, 200, 1000)
         glMatrixMode(GL_MODELVIEW)
 
+    def resize(self, width, height):
+        self.set_viewport(width, height)
 
     def display(self):
         with glsl.ShaderProgram(self._program):
