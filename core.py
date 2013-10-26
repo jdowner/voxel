@@ -65,55 +65,18 @@ class Voxel(object):
 
 
 class Renderer(object):
-    def __init__(self, width, height):
-        self._program = 0
-        self._vertex_shaders = []
-        self._fragment_shaders = []
+    def __init__(self, program, (width, height)):
+        self._program = program
         self._voxels = []
         self._vbo_voxels = None
 
         glClearColor(0.2, 0.2, 0.2, 1.0)
-        glClearDepth(1.0)
 
-        glMatrixMode(GL_PROJECTION)
-        glLoadIdentity()
-        glFrustum(-1.0, 1.0, -1.0, 1.0, 1.0, 100.0)
-
-        glMatrixMode(GL_MODELVIEW)
-
+        self.set_viewport(width, height)
 
     def add_voxel(self, voxel):
         self._vbo_voxels = None
         self._voxels.append(voxel)
-
-
-    def load_vertex_shader(self, filename):
-        with open(filename) as fp:
-            shader = fp.read()
-        self._vertex_shaders.append(glsl.compileShader(shader, GL_VERTEX_SHADER))
-
-
-    def load_fragment_shader(self, filename):
-        with open(filename) as fp:
-            shader = fp.read()
-        self._vertex_shaders.append(glsl.compileShader(shader, GL_FRAGMENT_SHADER))
-
-
-    def build_program(self):
-        if self._program != 0:
-            glDeleteProgram(self._program)
-
-        self._program = glCreateProgram()
-
-        for shader in self._vertex_shaders:
-            glAttachShader(self._program, shader)
-
-        for shader in self._fragment_shaders:
-            glAttachShader(self._program, shader)
-
-        glLinkProgram(self._program)
-        glValidateProgram(self._program)
-
 
     def set_viewport(self, width, height):
         assert width > 0
@@ -129,16 +92,18 @@ class Renderer(object):
         self.set_viewport(width, height)
 
     def display(self):
-        with glsl.ShaderProgram(self._program):
+        with glsl.ShaderProgram(self._program.handle):
             try:
-                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+                glMatrixMode(GL_MODELVIEW)
                 glLoadIdentity()
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-                glEnable(GL_BLEND);
-                glDepthMask(GL_FALSE);
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+                glEnable(GL_CULL_FACE)
+                glEnable(GL_DEPTH_TEST)
+                glDepthFunc(GL_LESS)
 
-                glTranslatef(0,0,-10)
+                glScalef(1,1,-1)
+                glTranslate(0,0,200)
 
                 if self._vbo_voxels is None:
                     self._construct_vbo_voxels()

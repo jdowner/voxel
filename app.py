@@ -19,10 +19,12 @@ import core
 
 class App(object):
     def __init__(self):
-        self._renderer = core.Renderer(800, 600)
-        self._renderer.load_vertex_shader('basic.vert')
-        self._renderer.load_fragment_shader('basic.frag')
-        self._renderer.build_program()
+        program = core.ShaderProgram();
+        program.load_vertex_shader('basic.vert')
+        program.load_fragment_shader('basic.frag')
+        program.build()
+
+        self._renderer = core.Renderer(program, (800, 600))
 
     @property
     def renderer(self):
