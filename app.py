@@ -26,6 +26,9 @@ class App(object):
 
         self._renderer = core.Renderer(program, (800, 600))
 
+        self._renderer.add_voxel(core.Voxel(100,100,20,10,10,10,1.0,0.0,0.0,1.0))
+        self._renderer.add_voxel(core.Voxel(200,200,100,10,10,10,1.0,1.0,1.0,1.0))
+
     @property
     def renderer(self):
         return self._renderer
