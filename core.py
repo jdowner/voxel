@@ -1,4 +1,5 @@
 import logging
+import sys
 
 import numpy
 import OpenGL
@@ -161,4 +162,112 @@ class Renderer(object):
     def _construct_vbo_voxels(self):
         vertices = [v for q in self._voxels for v in q.vertices]
         self._vbo_voxels = vbo.VBO(numpy.array(vertices, 'f'))
+
+
+class ShaderProgram(object):
+    """
+    This class encapsulates the shader program and provides some utilities and
+    convenience functions for interacting with the shader program.
+    """
+
+    def __init__(self):
+        """
+        Create an instance of ShaderProgram.
+        """
+        self._vertex_shaders = []
+        self._fragment_shaders = []
+        self._program = None
+
+    @property
+    def vertex_shaders(self):
+        """
+        This list of vertex shaders associated with this program.
+        """
+        return self._vertex_shaders
+
+    @property
+    def fragment_shaders(self):
+        """
+        This list of fragment shaders associated with this program.
+        """
+        return self._fragment_shaders
+
+    @property
+    def handle(self):
+        """
+        Returns the handle/id of the shader program. Ideally we would not be
+        exposing this. Consider it deprecated.
+        """
+        return self._program
+
+    def load_vertex_shader(self, filename):
+        """
+        Loads a vertex shader.
+
+        @param filename - the path to the file containing the vertex shader.
+        """
+        with open(filename) as fp:
+            shader = fp.read()
+
+        try:
+            self._vertex_shaders.append(glsl.compileShader(shader, GL_VERTEX_SHADER))
+        except RuntimeError as e:
+            loc, shader, errcode = e.args
+            print(errcode)
+            print(loc)
+            for number, line in enumerate(shader[0].split('\r\n')):
+                print('%d: %s' % (number, line))
+            sys.exit(1)
+
+    def load_fragment_shader(self, filename):
+        """
+        Loads a fragment shader.
+
+        @param filename - the path to the file containing the fragment shader.
+        """
+        with open(filename) as fp:
+            shader = fp.read()
+        self._fragment_shaders.append(glsl.compileShader(shader, GL_FRAGMENT_SHADER))
+
+    def build(self):
+        """
+        Compiles and links that shader program. Note that repeated calls to this
+        function can be made, but the exiting shader program (known by this
+        object) will be destroyed first.
+        """
+        if self._program is not None:
+            glDeleteProgram(self._program)
+
+        # Create the shader program and attach all of the shaders
+        self._program = glCreateProgram()
+
+        for shader in self._vertex_shaders:
+            glAttachShader(self._program, shader)
+
+        for shader in self._fragment_shaders:
+            glAttachShader(self._program, shader)
+
+        # Linking stage
+        glLinkProgram(self._program)
+
+        # Check that the program in valid and throw and informative exception if
+        # it is not.
+        glValidateProgram(self._program)
+        if not glGetProgramiv(self._program, GL_VALIDATE_STATUS):
+            info = glGetProgramInfoLog(self._program)
+            raise RuntimeError('Invalid program: %s' % (info,))
+
+        # Find all of the active uniform variables in the program and bind them
+        # to this object. This provides a nice interface for setting the uniform
+        # variables.
+        num_active_uniforms = glGetProgramiv(self._program, GL_ACTIVE_UNIFORMS)
+        for index in xrange(num_active_uniforms):
+            name, location, dtype = glGetActiveUniform(self._program, index)
+
+            # @todo support for data types
+            if dtype == GL_FLOAT_VEC3:
+                def set_uniform(_, vals):
+                    glUniform(location, *vals)
+
+                setattr(self, name, set_uniform)
 
