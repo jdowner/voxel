@@ -1,5 +1,6 @@
 import logging
 import sys
+import math
 
 import numpy
 import OpenGL
@@ -238,3 +239,122 @@ class ShaderProgram(object):
 
                 setattr(self, name, set_uniform)
 
+
+
+class Quaternion(object):
+    def __init__(self, w, x, y, z):
+        self._data = numpy.array([w, x, y, z], dtype = numpy.float32)
+
+    def __iadd__(self, q):
+        self._data = numpy.add(self._data, q._data)
+        return self
+
+    def __isub__(self, q):
+        self._data = numpy.subtract(self._data, q._data)
+        return self
+
+    def __imul__(self, q):
+        # (ua + va)(ub + vb) = (ua * ub - va * vb) + ua * vb + ub * va + va x vb
+
+        u = self._data
+        v = q._data
+
+        r = u[0] * v[0] - numpy.dot(u[1:], v[1:])
+        s = u[0] * v[1:] + v[0] * u[1:] + numpy.cross(u[1:], v[1:])
+
+        self._data[0] = r
+        self._data[1:] = s
+
+        return self
+
+    def __add__(self, q):
+        r = self.clone()
+        r += q
+        return r
+
+    def __sub__(self, q):
+        r = self.clone()
+        r -= q
+        return r
+
+    def __mul__(self, q):
+        r = self.clone()
+        r *= q
+        return r
+
+    def __eq__(self, q):
+        return numpy.array_equal(self._data, q._data)
+
+    def __ne__(self, q):
+        return not numpy.array_equal(self._data, q._data)
+
+    def __repr__(self):
+        return repr((self.w, self.x, self.y, self.z))
+
+    @property
+    def w(self):
+        return self._data[0]
+
+    @property
+    def x(self):
+        return self._data[1]
+
+    @property
+    def y(self):
+        return self._data[2]
+
+    @property
+    def z(self):
+        return self._data[3]
+
+    @property
+    def length(self):
+        return numpy.linalg.norm(self._data)
+
+    @classmethod
+    def from_axis_angle(cls, x, y, z, angle):
+        lensqr = x * x + y * y + z * z
+        if abs(lensqr - 1.0) > 0.0001:
+            length = math.sqrt(lensqr)
+            x = x / length
+            y = y / length
+            z = z / length
+
+        c = math.cos(angle / 2.0)
+        s = math.sin(angle / 2.0)
+        return cls(c, s * x, s * y, s * z)
+
+    def clone(self):
+        return Quaternion(self.w, self.x, self.y, self.z)
+
+    def conjugate(self):
+        self._data = numpy.multiply(numpy.array([1, -1, -1, -1]), self._data)
+        return self
+
+    def invert(self):
+        self.conjugate()
+        self._data = self._data / numpy.dot(self._data, self._data)
+        return self
+
+    def normalize(self):
+        self._data = self._data / self.length
+        return self
+
+    def conjugated(self):
+        return self.clone().conjugate()
+
+    def inverted(self):
+        return self.clone().invert()
+
+    def normalized(self):
+        return self.clone().normalize()
+
+    def angle(self):
+        return self._data[0]
+
+    def axis(self):
+        return self._data[1:]
+
+    def rotate(self, (x, y, z)):
+        q = self * Quaternion(0, x, y, z) * self.inverted()
+        return map(float, q.axis().tolist())
