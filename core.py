@@ -113,7 +113,7 @@ class Renderer(object):
                 try:
                     glEnableClientState(GL_VERTEX_ARRAY)
                     glEnableClientState(GL_COLOR_ARRAY)
-                    glVertexPointer(4, GL_FLOAT, 28, self._vbo_voxels)
+                    glVertexPointer(3, GL_FLOAT, 28, self._vbo_voxels)
                     glColorPointer(4, GL_FLOAT, 28, self._vbo_voxels + 12)
                     glDrawArrays(GL_QUADS, 0, len(self._vbo_voxels))
                 finally:
