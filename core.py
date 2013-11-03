@@ -240,6 +240,46 @@ class ShaderProgram(object):
                 setattr(self, name, set_uniform)
 
 
+class Frustum(object):
+    def __init__(self, height, width, depth, fov):
+        self._height = height
+        self._width = width
+        self._depth = depth
+        self._fov = fov
+
+    @property
+    def height(self):
+        return self._height
+
+    @property
+    def width(self):
+        return self._width
+
+    @property
+    def depth(self):
+        return self._depth
+
+    @property
+    def fov(self):
+        return self._fov
+
+    def update(self):
+        near = self.width * math.tan(self.fov * math.pi / 180.0)
+        far = self.depth + near
+
+        half_width = self.width / 2.0
+        half_height = self.height / 2.0
+
+        glMatrixMode(GL_PROJECTION)
+        glLoadIdentity()
+        glFrustum(-half_width, half_width, -half_height, half_height, near, far)
+
+    def resize(self, (width, height)):
+        self._width = width
+        self._height = height
+        self.update()
+
+
 
 class Quaternion(object):
     def __init__(self, w, x, y, z):
