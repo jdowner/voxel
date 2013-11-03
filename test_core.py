@@ -3,7 +3,7 @@ import unittest
 
 import numpy
 
-from core import Quaternion
+from core import (Camera, Quaternion)
 
 class TestQuaternion(unittest.TestCase):
     def setUp(self):
@@ -93,7 +93,7 @@ class TestQuaternion(unittest.TestCase):
 
         c = math.cos(theta / 2.0)
         s = math.sin(theta / 2.0)
-        q = Quaternion.from_axis_angle(1, -1, 1, theta)
+        q = Quaternion.from_axis_angle(numpy.array([1, -1, 1]), theta)
 
         self.assertAlmostEqual( c, q.w)
         self.assertAlmostEqual( s * math.sqrt(1.0 / 3.0), q.x)
@@ -101,7 +101,7 @@ class TestQuaternion(unittest.TestCase):
         self.assertAlmostEqual( s * math.sqrt(1.0 / 3.0), q.z)
 
     def test_rotate(self):
-        q = Quaternion.from_axis_angle(0, 1, 0, math.pi / 2.0)
+        q = Quaternion.from_axis_angle(numpy.array([0, 1, 0]), math.pi / 2.0)
         v = q.rotate((1, 0, 0))
 
         self.assertAlmostEqual( 0, v[0])
@@ -112,6 +112,58 @@ class TestQuaternion(unittest.TestCase):
         self.assertEqual(Quaternion(1, 0, -1, 0), self.a.conjugated())
         self.assertEqual(Quaternion(1, -1, 0, 0), self.b.conjugated())
         self.assertEqual(Quaternion(0, -1, 0, -1), self.c.conjugated())
+
+
+class TestCamera(unittest.TestCase):
+    def setUp(self):
+        self.camera = Camera()
+
+        self.e1 = numpy.array([1,0,0])
+        self.e2 = numpy.array([0,1,0])
+        self.e3 = numpy.array([0,0,1])
+
+    def test_initialization(self):
+        self.assertTrue(numpy.allclose(self.e1, self.camera.right))
+        self.assertTrue(numpy.allclose(self.e2, self.camera.up))
+        self.assertTrue(numpy.allclose(self.e3, self.camera.backward))
+
+    def test_rotation(self):
+        self.camera.yaw(math.pi / 120.0)
+
+        angle = self.camera.orientation.angle()
+        axis = self.camera.orientation.axis()
+
+        self.assertAlmostEqual(math.pi / 120.0, angle, places = 3)
+        self.assertTrue(numpy.allclose(self.e2, axis))
+
+    def test_move_forward(self):
+        self.camera.position = self.e3
+        self.camera.yaw(-math.pi / 4.0)
+        self.camera.move_forward(math.sqrt(2.0))
+
+        self.assertTrue(numpy.allclose(self.e1, self.camera.position, atol=1e-6))
+
+    def test_rotation_accumulation(self):
+        self.camera.move_backward(1.0)
+        self.camera.move_right(1.0)
+        self.camera.move_up(1.0)
+
+        for _ in xrange(27):
+            self.camera.yaw(math.pi / 12.0)
+
+        print('right',self.camera.right)
+        print('up',self.camera.up)
+        print('forward',self.camera.forward)
+        #self.assertTrue(numpy.allclose(self.e1, self.camera.right))
+
+        self.camera.move_right(math.sqrt(2.0))
+
+        print(self.camera.position)
+
+        print(self.camera.orientation.angle())
+        print(self.camera.orientation.axis())
+
+
 
 if __name__ == "__main__":
     unittest.main()
