@@ -280,6 +280,85 @@ class Frustum(object):
         self.update()
 
 
+class Camera(object):
+    """
+    The camera class is used to define the viewers perspective.
+    """
+
+    def __init__(self):
+        self._basis = numpy.diag((1.0,1.0,1.0))
+        self._orientation = Quaternion.from_axis_angle(
+                numpy.array([0.0, 1.0, 0.0]), 0.0)
+        self._position = numpy.array([0,0,0], dtype=numpy.float32)
+
+    @property
+    def position(self):
+        return self._position
+
+    @position.setter
+    def position(self, position):
+        self._position = position.astype(float)
+
+    @property
+    def orientation(self):
+        return self._orientation
+
+    @orientation.setter
+    def orientation(self, orientation):
+        self._orientation = orientation
+
+    @property
+    def up(self):
+        return numpy.array(self._orientation.rotate(self._basis[:,1]))
+
+    @property
+    def down(self):
+        return -self.up
+
+    @property
+    def forward(self):
+        return -numpy.array(self._orientation.rotate(self._basis[:,2]))
+
+    @property
+    def backward(self):
+        return -self.forward
+
+    @property
+    def left(self):
+        return -numpy.array(self._orientation.rotate(self._basis[:,0]))
+
+    @property
+    def right(self):
+        return -self.left
+
+    def pitch(self, angle):
+        pass
+
+    def roll(self, angle):
+        pass
+
+    def yaw(self, angle):
+        self._orientation = Quaternion.from_axis_angle(self.up, angle) * self._orientation
+        self._orientation.normalize()
+
+    def move_forward(self, distance):
+        self._position += distance * self.forward
+
+    def move_backward(self, distance):
+        self._position -= distance * self.forward
+
+    def move_left(self, distance):
+        self._position += distance * self.left
+
+    def move_right(self, distance):
+        self._position -= distance * self.left
+
+    def move_up(self, distance):
+        self._position += distance * self.up
+
+    def move_down(self, distance):
+        self._position -= distance * self.up
+
 
 class Quaternion(object):
     def __init__(self, w, x, y, z):
