@@ -6,7 +6,7 @@ varying vec4 color;
 void main()
 {
   vec3 direction = normalize(light_position - vertex);
-  float intensity = max(-dot(direction, normalize(normal)), 0.0);
+  float intensity = max(dot(direction, normalize(normal)), 0.0);
 
   intensity = floor(4.0 * intensity) / 4.0;
 
