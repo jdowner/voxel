@@ -44,7 +44,7 @@ class App(object):
             sys.exit()
 
     def mouse_move(self, *args):
-        print(args)
+        pass
 
     def mouse_press(self, *args):
-        print(args)
+        pass
