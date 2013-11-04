@@ -467,7 +467,7 @@ class Quaternion(object):
         return self.clone().normalize()
 
     def angle(self):
-        return self._data[0]
+        return 2.0 * math.atan2(numpy.linalg.norm(self._data[1:]), self.w)
 
     def axis(self):
         return self._data[1:]
