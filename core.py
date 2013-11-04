@@ -75,7 +75,7 @@ class Renderer(object):
         self._program = program
         self._voxels = []
         self._vbo_voxels = None
-        self._frustum = Frustum(width, height, 5000, 45.0)
+        self._frustum = Frustum(width, height, 5000, 25.0)
         self._camera = Camera()
         self._camera.position = numpy.array([0,0,5000])
         self._camera.orientation = Quaternion.from_axis_angle(
