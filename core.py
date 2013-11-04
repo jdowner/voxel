@@ -432,17 +432,14 @@ class Quaternion(object):
         return numpy.linalg.norm(self._data)
 
     @classmethod
-    def from_axis_angle(cls, x, y, z, angle):
-        lensqr = x * x + y * y + z * z
+    def from_axis_angle(cls, axis, angle):
+        lensqr = numpy.dot(axis, axis)
         if abs(lensqr - 1.0) > 0.0001:
-            length = math.sqrt(lensqr)
-            x = x / length
-            y = y / length
-            z = z / length
+            axis = axis / math.sqrt(lensqr)
 
         c = math.cos(angle / 2.0)
         s = math.sin(angle / 2.0)
-        return cls(c, s * x, s * y, s * z)
+        return cls(c, s * axis[0], s * axis[1], s * axis[2])
 
     def clone(self):
         return Quaternion(self.w, self.x, self.y, self.z)
