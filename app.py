@@ -90,6 +90,18 @@ class App(object):
     def move_right(self):
         self.renderer.camera.move_right(20.0)
 
+    def roll_left(self):
+        self.renderer.camera.roll(math.pi / 120.0)
+
+    def roll_right(self):
+        self.renderer.camera.roll(-math.pi / 120.0)
+
+    def pitch_forward(self):
+        self.renderer.camera.pitch(-math.pi / 120.0)
+
+    def pitch_backward(self):
+        self.renderer.camera.pitch(math.pi / 120.0)
+
     def yaw_left(self):
         self.renderer.camera.yaw(math.pi / 120.0)
 
