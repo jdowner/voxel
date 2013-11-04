@@ -483,6 +483,25 @@ class Quaternion(object):
 
         return (x, y, z)
 
+    def matrix(self):
+        w = self.w
+        x = self.x
+        y = self.y
+        z = self.z
+
+        R = numpy.zeros((3,3))
+        R[0,0] = 1.0 - 2.0 * (y * y + z * z)
+        R[1,1] = 1.0 - 2.0 * (x * x + z * z)
+        R[2,2] = 1.0 - 2.0 * (x * x + y * y)
+        R[0,1] = 2.0 * (x * y + w * z)
+        R[0,2] = 2.0 * (x * z - w * y)
+        R[1,2] = 2.0 * (y * z + w * x)
+        R[1,0] = 2.0 * (x * y - w * z)
+        R[2,0] = 2.0 * (x * z + w * y)
+        R[2,1] = 2.0 * (y * z - w * x)
+
+        return R
+
     def rotate(self, (x, y, z)):
         q = self * Quaternion(0, x, y, z) * self.inverted()
         return map(float, q.axis().tolist())
