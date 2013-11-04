@@ -1,3 +1,4 @@
+import itertools
 import logging
 import sys
 import math
@@ -69,11 +70,18 @@ class Renderer(object):
         self._program = program
         self._voxels = []
         self._vbo_voxels = None
-        self._program.light_position = (200,200,0)
-
-        glClearColor(0.2, 0.2, 0.2, 1.0)
+        self._frustum = Frustum(width, height, 5000, 45.0)
+        self._camera = Camera()
+        self._camera.position = numpy.array([0,0,5000])
+        self._camera.orientation = Quaternion.from_axis_angle(
+                numpy.array([0, 1, 0]), 0)
+        self._clear_color = Color(0.3, 0.3, 0.3, 1.0)
 
         self.set_viewport(width, height)
+
+    @property
+    def camera(self):
+        return self._camera
 
     def add_voxel(self, voxel):
         self._vbo_voxels = None
@@ -84,17 +92,38 @@ class Renderer(object):
         assert height > 0
 
         glViewport(0, 0, width, height)
-        glMatrixMode(GL_PROJECTION)
-        glLoadIdentity()
-        glFrustum(0, width, height, 0, 200, 1000)
-        glMatrixMode(GL_MODELVIEW)
+
+        self._frustum.resize((width, height))
 
     def resize(self, width, height):
         self.set_viewport(width, height)
 
+    def _render_fiducials(self):
+        length = 20
+        sep = 100
+
+        hues = (c / 10.0 for c in xrange(1,10))
+        colors = [Color.from_hsv(hue, 0.5, 0.95) for hue in hues]
+        centers = [x for x in itertools.product([-sep,0,sep], repeat=3)]
+        for center, color in zip(centers, colors):
+            glPushMatrix()
+            glTranslate(*center)
+            glBegin(GL_LINES)
+            glColor3f(color.r, color.g, color.b)
+            glVertex3f(+length, 0, 0)
+            glVertex3f(-length, 0, 0)
+            glVertex3f(0, +length, 0)
+            glVertex3f(0, -length, 0)
+            glVertex3f(0, 0, +length)
+            glVertex3f(0, 0, -length)
+            glEnd()
+            glPopMatrix()
+
     def display(self):
         with glsl.ShaderProgram(self._program.handle):
             try:
+                glClearColor(*self._clear_color)
+
                 glMatrixMode(GL_MODELVIEW)
                 glLoadIdentity()
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -103,8 +132,22 @@ class Renderer(object):
                 glEnable(GL_DEPTH_TEST)
                 glDepthFunc(GL_LESS)
 
-                glScalef(1,1,-1)
-                glTranslate(0,0,200)
+                orientation = self.camera.orientation
+                axis = orientation.axis()
+                angle = orientation.angle()
+
+                glRotatef(-180.0 * angle / math.pi, axis[0], axis[1], axis[2])
+
+                position = self.camera.position
+                x = position[0]
+                y = position[1]
+                z = position[2]
+
+                glTranslate(-x, -y, -z)
+
+                #self._render_fiducials()
+
+                self._program.light_position(0, 0, 5000)
 
                 if self._vbo_voxels is None:
                     self._construct_vbo_voxels()
