@@ -504,7 +504,7 @@ class Quaternion(object):
 
     def rotate(self, (x, y, z)):
         q = self * Quaternion(0, x, y, z) * self.inverted()
-        return map(float, q.axis().tolist())
+        return map(float, q.axis())
 
 
 class Color(object):
