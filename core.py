@@ -478,3 +478,81 @@ class Quaternion(object):
     def rotate(self, (x, y, z)):
         q = self * Quaternion(0, x, y, z) * self.inverted()
         return map(float, q.axis().tolist())
+
+
+class Color(object):
+    def __init__(self, r, g, b, a):
+        self._color = (r, g, b, a)
+
+    @property
+    def r(self):
+        return self._color[0]
+
+    @property
+    def g(self):
+        return self._color[1]
+
+    @property
+    def b(self):
+        return self._color[2]
+
+    @property
+    def a(self):
+        return self._color[3]
+
+    @r.setter
+    def r(self):
+        return self._color[0]
+
+    @g.setter
+    def g(self):
+        return self._color[1]
+
+    @b.setter
+    def b(self):
+        return self._color[2]
+
+    @a.setter
+    def a(self):
+        return self._color[3]
+
+    @classmethod
+    def from_hsv(cls, h, s, v):
+        hi = int(6 * h)
+        f = 6 * h - hi
+        p = v * (1 - s)
+        q = v * (1 - f * s)
+        t = v * (1 - (1 - f) * s)
+
+        if hi == 0:
+            r, g, b = v, t, p
+        if hi == 1:
+            r, g, b = q, v, p
+        if hi == 2:
+            r, g, b = p, v, t
+        if hi == 3:
+            r, g, b = p, q, v
+        if hi == 4:
+            r, g, b = t, p, v
+        if hi == 5:
+            r, g, b = v, p, q
+
+        return cls(r, g, b, 1.0)
+
+    def __iter__(self):
+        return (c for c in self._color)
+
+    def __getitem__(self, i):
+        return self._color[i]
+
+    def __setitem__(self, i, v):
+        self._color[i] = v
+
+    def __getslice__(self, i, j):
+        return self._color[i:j]
+
+    def __setslice__(self, i, j, v):
+        self._color[i:j] = v
+
+    def __repr__(self):
+        return repr(self._color)
