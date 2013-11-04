@@ -1,13 +1,13 @@
-varying vec3 vertex;
+uniform vec3 light_position;
 varying vec3 normal;
-varying vec4 color;
+varying float intensity;
 
 void main()
 {
 	gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+	gl_FrontColor = gl_Color;
 
-	vertex = vec3(gl_ModelViewMatrix * gl_Vertex);
-	normal = normalize(vec3(gl_NormalMatrix * gl_Normal));
-	color = gl_Color;
+  normal = normalize(gl_NormalMatrix * gl_Normal);
+  intensity = max(dot(normalize(light_position), normal), 0.2);
 }
 
