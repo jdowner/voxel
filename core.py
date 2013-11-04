@@ -445,7 +445,7 @@ class Quaternion(object):
         return Quaternion(self.w, self.x, self.y, self.z)
 
     def conjugate(self):
-        self._data = numpy.multiply(numpy.array([1, -1, -1, -1]), self._data)
+        self._data[1:] = -self._data[1:]
         return self
 
     def invert(self):
