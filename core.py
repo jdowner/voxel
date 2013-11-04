@@ -470,7 +470,18 @@ class Quaternion(object):
         return 2.0 * math.atan2(numpy.linalg.norm(self._data[1:]), self.w)
 
     def axis(self):
-        return self._data[1:]
+        s2 = abs((1.0 - self.w) * (1.0 + self.w))
+        if s2 < 0.000001:
+            x = 0
+            y = 0
+            z = 1
+        else:
+            norm = numpy.linalg.norm(self._data[1:])
+            x = self.x / norm
+            y = self.y / norm
+            z = self.z / norm
+
+        return (x, y, z)
 
     def rotate(self, (x, y, z)):
         q = self * Quaternion(0, x, y, z) * self.inverted()
