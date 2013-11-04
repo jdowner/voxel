@@ -5,6 +5,7 @@ import math
 import sys
 import random
 
+import h5py
 import numpy
 import OpenGL
 OpenGL.ERROR_ON_COPY = True
@@ -28,24 +29,25 @@ class App(object):
 
         self._renderer = core.Renderer(program, (800, 600))
 
-        random.seed(1)
+        with h5py.File('clusters.hdf5') as fp:
+            for group in fp:
+                r, g, b, a = core.Color.from_hsv(random.random(), 0.5, 0.95)
+                res = 10.0
+                def make_voxel(x, y, z):
+                    self._renderer.add_voxel(
+                            core.Voxel(x, y, z, res, res, res, r, g, b, a))
 
-        def make_voxel(x, y, z):
-            r, g, b, a = core.Color.from_hsv(random.random(), 0.5, 0.95)
-            self._renderer.add_voxel(core.Voxel(x, y, z, 10, 10, 10, r, g, b, a))
+                dataset = fp[group][...]
+                points = set()
 
-        points = set()
-        for i in xrange(4000):
-            x = random.randint(-1000, 1000)
-            y = random.randint(-1000, 1000)
-            z = random.randint(1000, 2000)
-            x = math.floor(x / 20.0) * 20.0
-            y = math.floor(y / 20.0) * 20.0
-            z = math.floor(z / 20.0) * 20.0
-            points.add((x, y, z))
+                for i in xrange(dataset.shape[0]):
+                    x = 1000.0 * dataset[i,0]
+                    y = 1000.0 * dataset[i,2]
+                    z = 1000.0 * dataset[i,3]
+                    points.add((x, y, z))
 
-        for x, y, z in points:
-            make_voxel(x, y, z)
+                for x, y, z in points:
+                    make_voxel(x, y, z)
 
         self._keys = {}
         self._keys['\x1b'] = self.exit
