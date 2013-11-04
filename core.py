@@ -230,14 +230,15 @@ class ShaderProgram(object):
         # variables.
         num_active_uniforms = glGetProgramiv(self._program, GL_ACTIVE_UNIFORMS)
         for index in xrange(num_active_uniforms):
-            name, location, dtype = glGetActiveUniform(self._program, index)
+            name, _, dtype = glGetActiveUniform(self._program, index)
+            location = glGetUniformLocation(self._program, name)
 
             # @todo support for data types
             if dtype == GL_FLOAT_VEC3:
-                def set_uniform(_, vals):
-                    glUniform(location, *vals)
+                def set_uniform_3f(x, y, z):
+                    glUniform3f(location, x, y, z)
 
-                setattr(self, name, set_uniform)
+                setattr(self, name, set_uniform_3f)
 
 
 class Frustum(object):
