@@ -51,15 +51,13 @@ class App(object):
 
         self._keys = {}
         self._keys['\x1b'] = self.exit
-        self._keys['k'] = self.move_forward
-        self._keys['j'] = self.move_backward
-        self._keys['J'] = self.move_down
-        self._keys['K'] = self.move_up
-        self._keys['h'] = self.move_left
-        self._keys['l'] = self.move_right
-        self._keys['H'] = self.yaw_left
-        self._keys['L'] = self.yaw_right
-        self._keys['i'] = self.info
+        self._keys['w'] = self.move_forward
+        self._keys['s'] = self.move_backward
+        self._keys['a'] = self.move_left
+        self._keys['d'] = self.move_right
+
+        self._last_mouse_press = None
+        self._key_pressed = None
 
     @property
     def renderer(self):
@@ -67,6 +65,12 @@ class App(object):
 
     def resize(self, width, height):
         self.renderer.resize(width, height)
+
+    def idle(self):
+        key = self._key_pressed
+        if key is not None and key in self._keys:
+            self._keys[key]()
+        self.display()
 
     def display(self):
         self.renderer.display()
@@ -116,15 +120,25 @@ class App(object):
         print('position',self.renderer.camera.position)
 
     def keyboard(self, *args):
-        key = args[0]
-        if key in self._keys:
-            self._keys[key]()
+        self._key_pressed = args[0]
+
+    def keyboard_up(self, *args):
+        self._key_pressed = None
 
     def mouse_move(self, *args):
-        pass
+        xn, yn = args
+        if self._last_mouse_press:
+            x0, y0 = self._last_mouse_press
+            delta_x = xn - x0
+            delta_y = yn - y0
+            self.renderer.camera.yaw(-0.001 * delta_x * math.pi / 360.0)
+            self.renderer.camera.pitch(-0.001 * delta_y * math.pi / 360.0)
 
     def mouse_press(self, *args):
-        pass
+        button, up, x, y = args
+        if button == 0:
+            self._last_mouse_press = (x, y) if not up else None
+
 
     def _random_voxels(self):
         random.seed(1)

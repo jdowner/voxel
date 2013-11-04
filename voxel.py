@@ -26,10 +26,13 @@ def main():
     window = glutCreateWindow("--VOXEL--")
     a = app.App()
 
+    glutIgnoreKeyRepeat(1)
+
     glutDisplayFunc(a.display)
-    glutIdleFunc(a.display)
+    glutIdleFunc(a.idle)
     glutReshapeFunc(a.resize)
     glutKeyboardFunc(a.keyboard)
+    glutKeyboardUpFunc(a.keyboard_up)
     glutMouseFunc(a.mouse_press)
     glutMotionFunc(a.mouse_move)
 
