@@ -34,30 +34,35 @@ def set_log_level(level):
 class Voxel(object):
     def __init__(self, x, y, z, hx, hy, hz, r, g, b, a):
         self._vertices = [
-                [x + hx, y - hy, z - hz, r, g, b, a],
-                [x + hx, y + hy, z - hz, r, g, b, a],
-                [x + hx, y + hy, z + hz, r, g, b, a],
-                [x + hx, y - hy, z + hz, r, g, b, a],
-                [x + hx, y - hy, z + hz, r, g, b, a],
-                [x + hx, y + hy, z + hz, r, g, b, a],
-                [x - hx, y + hy, z + hz, r, g, b, a],
-                [x - hx, y - hy, z + hz, r, g, b, a],
-                [x + hx, y + hy, z + hz, r, g, b, a],
-                [x + hx, y + hy, z - hz, r, g, b, a],
-                [x - hx, y + hy, z - hz, r, g, b, a],
-                [x - hx, y + hy, z + hz, r, g, b, a],
-                [x - hx, y - hy, z + hz, r, g, b, a],
-                [x - hx, y + hy, z + hz, r, g, b, a],
-                [x - hx, y + hy, z - hz, r, g, b, a],
-                [x - hx, y - hy, z - hz, r, g, b, a],
-                [x - hx, y - hy, z - hz, r, g, b, a],
-                [x - hx, y + hy, z - hz, r, g, b, a],
-                [x + hx, y + hy, z - hz, r, g, b, a],
-                [x + hx, y - hy, z - hz, r, g, b, a],
-                [x - hx, y - hy, z + hz, r, g, b, a],
-                [x - hx, y - hy, z - hz, r, g, b, a],
-                [x + hx, y - hy, z - hz, r, g, b, a],
-                [x + hx, y - hy, z + hz, r, g, b, a],
+                [x + hx, y - hy, z - hz, 1, 0, 0, r, g, b, a],
+                [x + hx, y + hy, z - hz, 1, 0, 0, r, g, b, a],
+                [x + hx, y + hy, z + hz, 1, 0, 0, r, g, b, a],
+                [x + hx, y - hy, z + hz, 1, 0, 0, r, g, b, a],
+
+                [x + hx, y - hy, z + hz, 0, 0, 1, r, g, b, a],
+                [x + hx, y + hy, z + hz, 0, 0, 1, r, g, b, a],
+                [x - hx, y + hy, z + hz, 0, 0, 1, r, g, b, a],
+                [x - hx, y - hy, z + hz, 0, 0, 1, r, g, b, a],
+
+                [x + hx, y + hy, z + hz, 0, 1, 0, r, g, b, a],
+                [x + hx, y + hy, z - hz, 0, 1, 0, r, g, b, a],
+                [x - hx, y + hy, z - hz, 0, 1, 0, r, g, b, a],
+                [x - hx, y + hy, z + hz, 0, 1, 0, r, g, b, a],
+
+                [x - hx, y - hy, z + hz, -1, 0, 0, r, g, b, a],
+                [x - hx, y + hy, z + hz, -1, 0, 0, r, g, b, a],
+                [x - hx, y + hy, z - hz, -1, 0, 0, r, g, b, a],
+                [x - hx, y - hy, z - hz, -1, 0, 0, r, g, b, a],
+
+                [x - hx, y - hy, z - hz, 0, 0, -1, r, g, b, a],
+                [x - hx, y + hy, z - hz, 0, 0, -1, r, g, b, a],
+                [x + hx, y + hy, z - hz, 0, 0, -1, r, g, b, a],
+                [x + hx, y - hy, z - hz, 0, 0, -1, r, g, b, a],
+
+                [x - hx, y - hy, z + hz, 0, -1, 0, r, g, b, a],
+                [x - hx, y - hy, z - hz, 0, -1, 0, r, g, b, a],
+                [x + hx, y - hy, z - hz, 0, -1, 0, r, g, b, a],
+                [x + hx, y - hy, z + hz, 0, -1, 0, r, g, b, a],
                 ]
 
     @property
@@ -155,13 +160,16 @@ class Renderer(object):
                 self._vbo_voxels.bind()
                 try:
                     glEnableClientState(GL_VERTEX_ARRAY)
+                    glEnableClientState(GL_NORMAL_ARRAY)
                     glEnableClientState(GL_COLOR_ARRAY)
-                    glVertexPointer(3, GL_FLOAT, 28, self._vbo_voxels)
-                    glColorPointer(4, GL_FLOAT, 28, self._vbo_voxels + 12)
+                    glVertexPointer(3, GL_FLOAT, 40, self._vbo_voxels)
+                    glNormalPointer(GL_FLOAT, 40, self._vbo_voxels + 12)
+                    glColorPointer(4, GL_FLOAT, 40, self._vbo_voxels + 24)
                     glDrawArrays(GL_QUADS, 0, len(self._vbo_voxels))
                 finally:
                     self._vbo_voxels.unbind()
                     glDisableClientState(GL_VERTEX_ARRAY)
+                    glDisableClientState(GL_NORMAL_ARRAY)
                     glDisableClientState(GL_COLOR_ARRAY)
             except:
                 # @todo need to print out the relevant information and terminate
