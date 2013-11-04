@@ -384,10 +384,12 @@ class Camera(object):
         return -self.left
 
     def pitch(self, angle):
-        pass
+        self._orientation = Quaternion.from_axis_angle(self.right, angle) * self._orientation
+        self._orientation.normalize()
 
     def roll(self, angle):
-        pass
+        self._orientation = Quaternion.from_axis_angle(self.forward, angle) * self._orientation
+        self._orientation.normalize()
 
     def yaw(self, angle):
         self._orientation = Quaternion.from_axis_angle(self.up, angle) * self._orientation
