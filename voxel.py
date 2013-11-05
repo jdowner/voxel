@@ -17,6 +17,7 @@ import core
 import app
 
 def main():
+    # Parse command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('-v', '--verbose', action='store_true', default=False)
     parser.add_argument('datafile')
@@ -26,15 +27,16 @@ def main():
     if args.verbose:
         core.set_log_level('debug')
 
+    # Initialize the window
     glutInit(sys.argv)
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH)
     glutInitWindowSize(800, 600)
     glutInitWindowPosition(0, 0)
-
-    window = glutCreateWindow("--VOXEL--")
-    a = app.App(datafile = args.datafile)
-
+    glutCreateWindow("--VOXEL--")
     glutIgnoreKeyRepeat(1)
+
+    # Create application and bind functions to GLUT
+    a = app.App(datafile = args.datafile)
 
     glutDisplayFunc(a.display)
     glutIdleFunc(a.idle)
@@ -44,6 +46,7 @@ def main():
     glutMouseFunc(a.mouse_press)
     glutMotionFunc(a.mouse_move)
 
+    # Log diagnostic information
     core.log.debug("GL_RENDERER   = %s" % (glGetString(GL_RENDERER),))
     core.log.debug("GL_VERSION    = %s" % (glGetString(GL_VERSION),))
     core.log.debug("GL_VENDOR     = %s" % (glGetString(GL_VENDOR),))
