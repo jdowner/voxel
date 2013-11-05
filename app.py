@@ -21,7 +21,7 @@ import core
 
 
 class App(object):
-    def __init__(self):
+    def __init__(self, datafile = None):
         program = core.ShaderProgram();
         program.load_vertex_shader('basic.vert')
         program.load_fragment_shader('basic.frag')
@@ -29,7 +29,30 @@ class App(object):
 
         self._renderer = core.Renderer(program, (800, 600))
 
-        with h5py.File('clusters.hdf5') as fp:
+        if datafile is not None:
+            self._load_data(datafile)
+
+        self._keys = {}
+        self._keys['\x1b'] = self.exit
+        self._keys['w'] = self.move_forward
+        self._keys['s'] = self.move_backward
+        self._keys['a'] = self.move_left
+        self._keys['d'] = self.move_right
+
+        self._keys['W'] = self.pitch_forward
+        self._keys['S'] = self.pitch_backward
+        self._keys['A'] = self.yaw_left
+        self._keys['D'] = self.yaw_right
+
+        self._last_mouse_press = None
+        self._key_pressed = None
+
+    @property
+    def renderer(self):
+        return self._renderer
+
+    def _load_data(self, filename):
+        with h5py.File(filename) as fp:
             for group in fp:
                 r, g, b, a = core.Color.from_hsv(random.random(), 0.5, 0.95)
                 res = 10.0
@@ -41,27 +64,13 @@ class App(object):
                 points = set()
 
                 for i in xrange(dataset.shape[0]):
-                    x = 1000.0 * dataset[i,0]
+                    x = 1000.0 * dataset[i,1]
                     y = 1000.0 * dataset[i,2]
                     z = 1000.0 * dataset[i,3]
                     points.add((x, y, z))
 
                 for x, y, z in points:
                     make_voxel(x, y, z)
-
-        self._keys = {}
-        self._keys['\x1b'] = self.exit
-        self._keys['w'] = self.move_forward
-        self._keys['s'] = self.move_backward
-        self._keys['a'] = self.move_left
-        self._keys['d'] = self.move_right
-
-        self._last_mouse_press = None
-        self._key_pressed = None
-
-    @property
-    def renderer(self):
-        return self._renderer
 
     def resize(self, width, height):
         self.renderer.resize(width, height)
