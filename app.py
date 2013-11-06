@@ -74,12 +74,8 @@ class App(object):
 
                 dataset = fp[group]
                 points = set()
-
                 for i in xrange(dataset.shape[0]):
-                    x = 1000.0 * dataset[i,1]
-                    y = 1000.0 * dataset[i,2]
-                    z = 1000.0 * dataset[i,3]
-                    points.add((x, y, z))
+                    points.add(tuple(1000.0 * dataset[i,:2]))
 
                 for x, y, z in points:
                     make_voxel(x, y, z)
