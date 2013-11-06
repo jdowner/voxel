@@ -21,6 +21,7 @@ LOGLEVEL = {
         'error':    logging.ERROR,
         'critical': logging.CRITICAL}
 
+# Set up the logger
 log = logging.getLogger(__name__)
 formatter = logging.Formatter('%(asctime)s:%(levelname)s: %(message)s')
 sh = logging.StreamHandler()
@@ -31,63 +32,51 @@ def set_log_level(level):
     log.setLevel(LOGLEVEL[level.lower()])
 
 
-class Voxel(object):
-    def __init__(self, x, y, z, hx, hy, hz, r, g, b, a):
-        self._vertices = [
-                [x + hx, y - hy, z - hz, r, g, b, a],
-                [x + hx, y + hy, z - hz, r, g, b, a],
-                [x + hx, y + hy, z + hz, r, g, b, a],
-                [x + hx, y - hy, z + hz, r, g, b, a],
-                [x + hx, y - hy, z + hz, r, g, b, a],
-                [x + hx, y + hy, z + hz, r, g, b, a],
-                [x - hx, y + hy, z + hz, r, g, b, a],
-                [x - hx, y - hy, z + hz, r, g, b, a],
-                [x + hx, y + hy, z + hz, r, g, b, a],
-                [x + hx, y + hy, z - hz, r, g, b, a],
-                [x - hx, y + hy, z - hz, r, g, b, a],
-                [x - hx, y + hy, z + hz, r, g, b, a],
-                [x - hx, y - hy, z + hz, r, g, b, a],
-                [x - hx, y + hy, z + hz, r, g, b, a],
-                [x - hx, y + hy, z - hz, r, g, b, a],
-                [x - hx, y - hy, z - hz, r, g, b, a],
-                [x - hx, y - hy, z - hz, r, g, b, a],
-                [x - hx, y + hy, z - hz, r, g, b, a],
-                [x + hx, y + hy, z - hz, r, g, b, a],
-                [x + hx, y - hy, z - hz, r, g, b, a],
-                [x - hx, y - hy, z + hz, r, g, b, a],
-                [x - hx, y - hy, z - hz, r, g, b, a],
-                [x + hx, y - hy, z - hz, r, g, b, a],
-                [x + hx, y - hy, z + hz, r, g, b, a],
-                ]
-
-    @property
-    def vertices(self):
-        return self._vertices
-
-
 class Renderer(object):
+    """
+    This class is responsible for rendering the voxels to a window.
+
+    """
+
     def __init__(self, program, (width, height)):
+        """
+        Creates a renderer using the provided shader program and window size.
+
+        """
         self._program = program
         self._voxels = []
         self._vbo_voxels = None
-        self._frustum = Frustum(width, height, 5000, 45.0)
+        self._frustum = Frustum(width, height, 5000, 25.0)
         self._camera = Camera()
         self._camera.position = numpy.array([0,0,5000])
         self._camera.orientation = Quaternion.from_axis_angle(
                 numpy.array([0, 1, 0]), 0)
         self._clear_color = Color(0.3, 0.3, 0.3, 1.0)
 
-        self.set_viewport(width, height)
+        self.resize(width, height)
 
     @property
     def camera(self):
+        """
+        The camera that provides the scene view.
+
+        """
         return self._camera
 
     def add_voxel(self, voxel):
+        """
+        Add a voxel to the renderer.
+
+        """
+        # Setting the VBO to None will trigger its re-creation before rendering.
         self._vbo_voxels = None
         self._voxels.append(voxel)
 
-    def set_viewport(self, width, height):
+    def resize(self, width, height):
+        """
+        Sets the dimensions of the viewport and ensure that the frustum matches.
+
+        """
         assert width > 0
         assert height > 0
 
@@ -95,10 +84,12 @@ class Renderer(object):
 
         self._frustum.resize((width, height))
 
-    def resize(self, width, height):
-        self.set_viewport(width, height)
-
     def _render_fiducials(self):
+        """
+        A debugging function that draws 9 equally-spaced crosses about the
+        origin.
+
+        """
         length = 20
         sep = 100
 
@@ -120,8 +111,13 @@ class Renderer(object):
             glPopMatrix()
 
     def display(self):
+        """
+        This is the function that performs the actual rendering.
+
+        """
         with glsl.ShaderProgram(self._program.handle):
             try:
+                # Initialize the OpenGL state
                 glClearColor(*self._clear_color)
 
                 glMatrixMode(GL_MODELVIEW)
@@ -132,6 +128,7 @@ class Renderer(object):
                 glEnable(GL_DEPTH_TEST)
                 glDepthFunc(GL_LESS)
 
+                # Determine the model-view transform from the camera
                 orientation = self.camera.orientation
                 axis = orientation.axis()
                 angle = orientation.angle()
@@ -145,23 +142,26 @@ class Renderer(object):
 
                 glTranslate(-x, -y, -z)
 
-                #self._render_fiducials()
-
                 self._program.light_position(0, 0, 5000)
 
+                # Reconstruct the VBO if necessary
                 if self._vbo_voxels is None:
                     self._construct_vbo_voxels()
 
+                # Pass all of the data to the hardware
                 self._vbo_voxels.bind()
                 try:
                     glEnableClientState(GL_VERTEX_ARRAY)
+                    glEnableClientState(GL_NORMAL_ARRAY)
                     glEnableClientState(GL_COLOR_ARRAY)
-                    glVertexPointer(3, GL_FLOAT, 28, self._vbo_voxels)
-                    glColorPointer(4, GL_FLOAT, 28, self._vbo_voxels + 12)
+                    glVertexPointer(3, GL_FLOAT, 40, self._vbo_voxels)
+                    glNormalPointer(GL_FLOAT, 40, self._vbo_voxels + 12)
+                    glColorPointer(4, GL_FLOAT, 40, self._vbo_voxels + 24)
                     glDrawArrays(GL_QUADS, 0, len(self._vbo_voxels))
                 finally:
                     self._vbo_voxels.unbind()
                     glDisableClientState(GL_VERTEX_ARRAY)
+                    glDisableClientState(GL_NORMAL_ARRAY)
                     glDisableClientState(GL_COLOR_ARRAY)
             except:
                 # @todo need to print out the relevant information and terminate
@@ -171,6 +171,10 @@ class Renderer(object):
         glutSwapBuffers()
 
     def _construct_vbo_voxels(self):
+        """
+        Extract the vertices in the voxels and create the VBO.
+
+        """
         vertices = [v for q in self._voxels for v in q.vertices]
         self._vbo_voxels = vbo.VBO(numpy.array(vertices, 'f'))
 
@@ -184,6 +188,7 @@ class ShaderProgram(object):
     def __init__(self):
         """
         Create an instance of ShaderProgram.
+
         """
         self._vertex_shaders = []
         self._fragment_shaders = []
@@ -193,6 +198,7 @@ class ShaderProgram(object):
     def vertex_shaders(self):
         """
         This list of vertex shaders associated with this program.
+
         """
         return self._vertex_shaders
 
@@ -200,6 +206,7 @@ class ShaderProgram(object):
     def fragment_shaders(self):
         """
         This list of fragment shaders associated with this program.
+
         """
         return self._fragment_shaders
 
@@ -208,14 +215,14 @@ class ShaderProgram(object):
         """
         Returns the handle/id of the shader program. Ideally we would not be
         exposing this. Consider it deprecated.
+
         """
         return self._program
 
     def load_vertex_shader(self, filename):
         """
-        Loads a vertex shader.
+        Loads the specified vertex shader.
 
-        @param filename - the path to the file containing the vertex shader.
         """
         with open(filename) as fp:
             shader = fp.read()
@@ -224,27 +231,36 @@ class ShaderProgram(object):
             self._vertex_shaders.append(glsl.compileShader(shader, GL_VERTEX_SHADER))
         except RuntimeError as e:
             loc, shader, errcode = e.args
-            print(errcode)
-            print(loc)
+            log.error("%s" % (errcode,))
+            log.error("%s" % (loc,))
             for number, line in enumerate(shader[0].split('\r\n')):
-                print('%d: %s' % (number, line))
+                log.error('%d: %s' % (number, line))
             sys.exit(1)
 
     def load_fragment_shader(self, filename):
         """
-        Loads a fragment shader.
+        Loads the specified fragment shader.
 
-        @param filename - the path to the file containing the fragment shader.
         """
         with open(filename) as fp:
             shader = fp.read()
-        self._fragment_shaders.append(glsl.compileShader(shader, GL_FRAGMENT_SHADER))
+
+        try:
+            self._fragment_shaders.append(glsl.compileShader(shader, GL_FRAGMENT_SHADER))
+        except RuntimeError as e:
+            loc, shader, errcode = e.args
+            log.error("%s" % (errcode,))
+            log.error("%s" % (loc,))
+            for number, line in enumerate(shader[0].split('\r\n')):
+                log.error('%d: %s' % (number, line))
+            sys.exit(1)
 
     def build(self):
         """
         Compiles and links that shader program. Note that repeated calls to this
         function can be made, but the exiting shader program (known by this
         object) will be destroyed first.
+
         """
         if self._program is not None:
             glDeleteProgram(self._program)
@@ -285,7 +301,17 @@ class ShaderProgram(object):
 
 
 class Frustum(object):
+    """
+    The class represents a frustum and handles the perspective transformation
+    for the renderer.
+
+    """
+
     def __init__(self, height, width, depth, fov):
+        """
+        Creates a frustum.
+
+        """
         self._height = height
         self._width = width
         self._depth = depth
@@ -293,21 +319,44 @@ class Frustum(object):
 
     @property
     def height(self):
+        """
+        The height of the frustum in the near plane.
+
+        """
         return self._height
 
     @property
     def width(self):
+        """
+        The width of the frustum in the near plane.
+
+        """
         return self._width
 
     @property
     def depth(self):
+        """
+        The distance from the near plane to the far plane.
+
+        """
         return self._depth
 
     @property
     def fov(self):
+        """
+        The field of view (degrees).
+
+        """
         return self._fov
 
-    def update(self):
+    def resize(self, (width, height)):
+        """
+        Resizes the frustum using the provided dimensions.
+
+        """
+        self._width = width
+        self._height = height
+
         near = self.width * math.tan(self.fov * math.pi / 180.0)
         far = self.depth + near
 
@@ -317,11 +366,6 @@ class Frustum(object):
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
         glFrustum(-half_width, half_width, -half_height, half_height, near, far)
-
-    def resize(self, (width, height)):
-        self._width = width
-        self._height = height
-        self.update()
 
 
 class Camera(object):
@@ -337,87 +381,188 @@ class Camera(object):
 
     @property
     def position(self):
+        """
+        The position of the camera in the world co-ordinates.
+
+        """
         return self._position
 
     @position.setter
     def position(self, position):
+        """
+        Sets the position of the camera in world co-ordinates.
+
+        """
         self._position = position.astype(float)
 
     @property
     def orientation(self):
+        """
+        The orientation of the camera (quaternion) in world co-ordinates.
+
+        """
         return self._orientation
 
     @orientation.setter
     def orientation(self, orientation):
+        """
+        Sets the orientation of the camera (quaternion) in world co-ordinates.
+
+        """
         self._orientation = orientation
 
     @property
     def up(self):
+        """
+        The 'up' vector of the camera in world co-ordinates.
+
+        """
         return numpy.array(self._orientation.rotate(self._basis[:,1]))
 
     @property
     def down(self):
+        """
+        The 'down' vector of the camera in world co-ordinates.
+
+        """
         return -self.up
 
     @property
     def forward(self):
+        """
+        The 'forward' vector of the camera in world co-ordinates.
+
+        """
         return -numpy.array(self._orientation.rotate(self._basis[:,2]))
 
     @property
     def backward(self):
+        """
+        The 'backward' vector of the camera in world co-ordinates.
+
+        """
         return -self.forward
 
     @property
     def left(self):
+        """
+        The 'left' vector of the camera in world co-ordinates.
+
+        """
         return -numpy.array(self._orientation.rotate(self._basis[:,0]))
 
     @property
     def right(self):
+        """
+        The 'right' vector of the camera in world co-ordinates.
+
+        """
         return -self.left
 
     def pitch(self, angle):
-        pass
+        """
+        Rotates the pitch of the camera (radians).
+
+        """
+        self._orientation = Quaternion.from_axis_angle(self.right, angle) * self._orientation
+        self._orientation.normalize()
 
     def roll(self, angle):
-        pass
+        """
+        Rotates the roll of the camera (radians).
+
+        """
+        self._orientation = Quaternion.from_axis_angle(self.forward, angle) * self._orientation
+        self._orientation.normalize()
 
     def yaw(self, angle):
+        """
+        Rotates the yaw of the camera (radians).
+
+        """
         self._orientation = Quaternion.from_axis_angle(self.up, angle) * self._orientation
         self._orientation.normalize()
 
     def move_forward(self, distance):
+        """
+        Move the camera in the forward direction.
+
+        """
         self._position += distance * self.forward
 
     def move_backward(self, distance):
+        """
+        Move the camera in the backward direction.
+
+        """
         self._position -= distance * self.forward
 
     def move_left(self, distance):
+        """
+        Move the camera in the left direction.
+
+        """
         self._position += distance * self.left
 
     def move_right(self, distance):
+        """
+        Move the camera in the right direction.
+
+        """
         self._position -= distance * self.left
 
     def move_up(self, distance):
+        """
+        Move the camera in the up direction.
+
+        """
         self._position += distance * self.up
 
     def move_down(self, distance):
+        """
+        Move the camera in the down direction.
+
+        """
         self._position -= distance * self.up
 
 
 class Quaternion(object):
+    """
+    This class represents a quaternion implemented using numpy arrays.
+    """
+
     def __init__(self, w, x, y, z):
+        """
+        Creates a quaternion.
+
+        """
         self._data = numpy.array([w, x, y, z], dtype = numpy.float32)
 
     def __iadd__(self, q):
+        """
+        Adds a quaternion to this instance. Returns a reference to this
+        instance.
+
+        """
         self._data = numpy.add(self._data, q._data)
         return self
 
     def __isub__(self, q):
+        """
+        Subtracts a quaternion from this instance. Returns a reference to this
+        instance.
+
+        """
         self._data = numpy.subtract(self._data, q._data)
         return self
 
     def __imul__(self, q):
-        # (ua + va)(ub + vb) = (ua * ub - va * vb) + ua * vb + ub * va + va x vb
+        """
+        Post-multiplies this quaternion by another quaternion and returned a
+        reference to this instance.
+
+        """
+        # (ur + ui)(vr + vi) = (ur * vr - ui * vi) + ur * vi + vr * ui + ui x vi
 
         u = self._data
         v = q._data
@@ -431,24 +576,45 @@ class Quaternion(object):
         return self
 
     def __add__(self, q):
+        """
+        Adds a quaternion to this quaternion and returns the result.
+
+        """
         r = self.clone()
         r += q
         return r
 
     def __sub__(self, q):
+        """
+        Subtracts a quaternion from this quaternion and returns the result.
+
+        """
         r = self.clone()
         r -= q
         return r
 
     def __mul__(self, q):
+        """
+        Post-multiplies this quaternion by a another quaternion and results the
+        result.
+
+        """
         r = self.clone()
         r *= q
         return r
 
     def __eq__(self, q):
+        """
+        Returns True if the provided quaternion is equal to this quaternion.
+
+        """
         return numpy.array_equal(self._data, q._data)
 
     def __ne__(self, q):
+        """
+        Returns False if the provided quaternion is equal to this quaternion.
+
+        """
         return not numpy.array_equal(self._data, q._data)
 
     def __repr__(self):
@@ -456,26 +622,51 @@ class Quaternion(object):
 
     @property
     def w(self):
+        """
+        The w component of the quaternion.
+
+        """
         return self._data[0]
 
     @property
     def x(self):
+        """
+        The x component of the quaternion.
+
+        """
         return self._data[1]
 
     @property
     def y(self):
+        """
+        The y component of the quaternion.
+
+        """
         return self._data[2]
 
     @property
     def z(self):
+        """
+        The z component of the quaternion.
+
+        """
         return self._data[3]
 
     @property
     def length(self):
+        """
+        The length of the quaternion.
+
+        """
         return numpy.linalg.norm(self._data)
 
     @classmethod
     def from_axis_angle(cls, axis, angle):
+        """
+        Creates an instance of Quaternion using an axis (unit vector) and an
+        angle (radians).
+
+        """
         lensqr = numpy.dot(axis, axis)
         if abs(lensqr - 1.0) > 0.0001:
             axis = axis / math.sqrt(lensqr)
@@ -485,36 +676,76 @@ class Quaternion(object):
         return cls(c, s * axis[0], s * axis[1], s * axis[2])
 
     def clone(self):
+        """
+        Returns a copy of this quaternion.
+
+        """
         return Quaternion(self.w, self.x, self.y, self.z)
 
     def conjugate(self):
+        """
+        Conjugates this quaternion and returns a reference to this instance.
+
+        """
         self._data[1:] = -self._data[1:]
         return self
 
     def invert(self):
+        """
+        Inverts this quaternion and returns a reference to this instance.
+
+        """
         self.conjugate()
         self._data = self._data / numpy.dot(self._data, self._data)
         return self
 
     def normalize(self):
+        """
+        Normalizes this quaternion and returns a reference to this instance.
+
+        """
         self._data = self._data / self.length
         return self
 
     def conjugated(self):
+        """
+        Returns a conjugates copy of this quaternion.
+
+        """
         return self.clone().conjugate()
 
     def inverted(self):
+        """
+        Returns an inverted copy of this quaternion.
+
+        """
         return self.clone().invert()
 
     def normalized(self):
+        """
+        Returns a normalized copy of this quaternion.
+
+        """
         return self.clone().normalize()
 
     def angle(self):
+        """
+        Returns the angle that this quaternion represents (assumes that this is
+        a unit quaternion).
+
+        """
         return 2.0 * math.atan2(numpy.linalg.norm(self._data[1:]), self.w)
 
     def axis(self):
+        """
+        Returns the axis that this quaternion represents (assumes that this is a
+        unit quaternion).
+
+        """
         s2 = abs((1.0 - self.w) * (1.0 + self.w))
         if s2 < 0.000001:
+            # When s2 is effectively zero, the angle of the quaternion is
+            # approximately zero, so the axis returned is arbitrary.
             x = 0
             y = 0
             z = 1
@@ -527,6 +758,10 @@ class Quaternion(object):
         return (x, y, z)
 
     def matrix(self):
+        """
+        Returns a matrix representation of the quaternion.
+
+        """
         w = self.w
         x = self.x
         y = self.y
@@ -546,48 +781,96 @@ class Quaternion(object):
         return R
 
     def rotate(self, (x, y, z)):
+        """
+        Rotates a vector by this quaternion and returns the result.
+
+        """
         q = self * Quaternion(0, x, y, z) * self.inverted()
         return map(float, q.axis())
 
 
 class Color(object):
+    """
+    This class represents an RGBA color.
+    """
+
     def __init__(self, r, g, b, a):
+        """
+        Creates a color.
+
+        """
         self._color = (r, g, b, a)
 
     @property
     def r(self):
+        """
+        The red component of the color.
+
+        """
         return self._color[0]
 
     @property
     def g(self):
+        """
+        The green component of the color.
+
+        """
         return self._color[1]
 
     @property
     def b(self):
+        """
+        The blue component of the color.
+
+        """
         return self._color[2]
 
     @property
     def a(self):
+        """
+        The alpha component of the color.
+
+        """
         return self._color[3]
 
     @r.setter
     def r(self):
+        """
+        Sets the red component of the color.
+
+        """
         return self._color[0]
 
     @g.setter
     def g(self):
+        """
+        Sets the green component of the color.
+
+        """
         return self._color[1]
 
     @b.setter
     def b(self):
+        """
+        Sets the blue component of the color.
+
+        """
         return self._color[2]
 
     @a.setter
     def a(self):
+        """
+        Sets the alpha component of the color.
+
+        """
         return self._color[3]
 
     @classmethod
     def from_hsv(cls, h, s, v):
+        """
+        Creates a color from HSV values.
+
+        """
         hi = int(6 * h)
         f = 6 * h - hi
         p = v * (1 - s)
@@ -626,3 +909,57 @@ class Color(object):
 
     def __repr__(self):
         return repr(self._color)
+
+
+class Voxel(object):
+    """
+    This is a simple representation of a cubic, volume element that is used in
+    rendering.
+    """
+
+    def __init__(self, x, y, z, hx, hy, hz, r, g, b, a):
+        """
+        Creates a voxel using (x, y, z) as the center of the voxel, (hx, hy, hz)
+        as the half-widths of the voxel is the x, y, and z axis respectively,
+        and (r, g, b, a) is a float32 RGBA color.
+
+        """
+        self._vertices = [
+                [x + hx, y - hy, z - hz, 1, 0, 0, r, g, b, a],
+                [x + hx, y + hy, z - hz, 1, 0, 0, r, g, b, a],
+                [x + hx, y + hy, z + hz, 1, 0, 0, r, g, b, a],
+                [x + hx, y - hy, z + hz, 1, 0, 0, r, g, b, a],
+
+                [x + hx, y - hy, z + hz, 0, 0, 1, r, g, b, a],
+                [x + hx, y + hy, z + hz, 0, 0, 1, r, g, b, a],
+                [x - hx, y + hy, z + hz, 0, 0, 1, r, g, b, a],
+                [x - hx, y - hy, z + hz, 0, 0, 1, r, g, b, a],
+
+                [x + hx, y + hy, z + hz, 0, 1, 0, r, g, b, a],
+                [x + hx, y + hy, z - hz, 0, 1, 0, r, g, b, a],
+                [x - hx, y + hy, z - hz, 0, 1, 0, r, g, b, a],
+                [x - hx, y + hy, z + hz, 0, 1, 0, r, g, b, a],
+
+                [x - hx, y - hy, z + hz, -1, 0, 0, r, g, b, a],
+                [x - hx, y + hy, z + hz, -1, 0, 0, r, g, b, a],
+                [x - hx, y + hy, z - hz, -1, 0, 0, r, g, b, a],
+                [x - hx, y - hy, z - hz, -1, 0, 0, r, g, b, a],
+
+                [x - hx, y - hy, z - hz, 0, 0, -1, r, g, b, a],
+                [x - hx, y + hy, z - hz, 0, 0, -1, r, g, b, a],
+                [x + hx, y + hy, z - hz, 0, 0, -1, r, g, b, a],
+                [x + hx, y - hy, z - hz, 0, 0, -1, r, g, b, a],
+
+                [x - hx, y - hy, z + hz, 0, -1, 0, r, g, b, a],
+                [x - hx, y - hy, z - hz, 0, -1, 0, r, g, b, a],
+                [x + hx, y - hy, z - hz, 0, -1, 0, r, g, b, a],
+                [x + hx, y - hy, z + hz, 0, -1, 0, r, g, b, a],
+                ]
+
+    @property
+    def vertices(self):
+        """
+        The vertices of the voxel.
+
+        """
+        return self._vertices

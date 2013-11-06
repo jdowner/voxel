@@ -1,15 +1,13 @@
 uniform vec3 light_position;
-varying vec3 vertex;
-varying vec3 normal;
-varying vec4 color;
+varying float intensity;
 
 void main()
 {
-  vec3 direction = normalize(light_position - vertex);
-  float intensity = max(dot(direction, normalize(normal)), 0.0);
+  vec4 color = gl_Color;
+  color.x = intensity * color.x;
+  color.y = intensity * color.y;
+  color.z = intensity * color.z;
 
-  intensity = floor(4.0 * intensity) / 4.0;
-
-  gl_FragColor = color * vec4(intensity, intensity, intensity, 1.0);
+  gl_FragColor = color;
 }
 
