@@ -21,6 +21,7 @@ LOGLEVEL = {
         'error':    logging.ERROR,
         'critical': logging.CRITICAL}
 
+# Set up the logger
 log = logging.getLogger(__name__)
 formatter = logging.Formatter('%(asctime)s:%(levelname)s: %(message)s')
 sh = logging.StreamHandler()
@@ -29,45 +30,6 @@ log.addHandler(sh)
 
 def set_log_level(level):
     log.setLevel(LOGLEVEL[level.lower()])
-
-
-class Voxel(object):
-    def __init__(self, x, y, z, hx, hy, hz, r, g, b, a):
-        self._vertices = [
-                [x + hx, y - hy, z - hz, 1, 0, 0, r, g, b, a],
-                [x + hx, y + hy, z - hz, 1, 0, 0, r, g, b, a],
-                [x + hx, y + hy, z + hz, 1, 0, 0, r, g, b, a],
-                [x + hx, y - hy, z + hz, 1, 0, 0, r, g, b, a],
-
-                [x + hx, y - hy, z + hz, 0, 0, 1, r, g, b, a],
-                [x + hx, y + hy, z + hz, 0, 0, 1, r, g, b, a],
-                [x - hx, y + hy, z + hz, 0, 0, 1, r, g, b, a],
-                [x - hx, y - hy, z + hz, 0, 0, 1, r, g, b, a],
-
-                [x + hx, y + hy, z + hz, 0, 1, 0, r, g, b, a],
-                [x + hx, y + hy, z - hz, 0, 1, 0, r, g, b, a],
-                [x - hx, y + hy, z - hz, 0, 1, 0, r, g, b, a],
-                [x - hx, y + hy, z + hz, 0, 1, 0, r, g, b, a],
-
-                [x - hx, y - hy, z + hz, -1, 0, 0, r, g, b, a],
-                [x - hx, y + hy, z + hz, -1, 0, 0, r, g, b, a],
-                [x - hx, y + hy, z - hz, -1, 0, 0, r, g, b, a],
-                [x - hx, y - hy, z - hz, -1, 0, 0, r, g, b, a],
-
-                [x - hx, y - hy, z - hz, 0, 0, -1, r, g, b, a],
-                [x - hx, y + hy, z - hz, 0, 0, -1, r, g, b, a],
-                [x + hx, y + hy, z - hz, 0, 0, -1, r, g, b, a],
-                [x + hx, y - hy, z - hz, 0, 0, -1, r, g, b, a],
-
-                [x - hx, y - hy, z + hz, 0, -1, 0, r, g, b, a],
-                [x - hx, y - hy, z - hz, 0, -1, 0, r, g, b, a],
-                [x + hx, y - hy, z - hz, 0, -1, 0, r, g, b, a],
-                [x + hx, y - hy, z + hz, 0, -1, 0, r, g, b, a],
-                ]
-
-    @property
-    def vertices(self):
-        return self._vertices
 
 
 class Renderer(object):
@@ -636,3 +598,57 @@ class Color(object):
 
     def __repr__(self):
         return repr(self._color)
+
+
+class Voxel(object):
+    """
+    This is a simple representation of a cubic, volume element that is used in
+    rendering.
+    """
+
+    def __init__(self, x, y, z, hx, hy, hz, r, g, b, a):
+        """
+        Creates a voxel using (x, y, z) as the center of the voxel, (hx, hy, hz)
+        as the half-widths of the voxel is the x, y, and z axis respectively,
+        and (r, g, b, a) is a float32 RGBA color.
+
+        """
+        self._vertices = [
+                [x + hx, y - hy, z - hz, 1, 0, 0, r, g, b, a],
+                [x + hx, y + hy, z - hz, 1, 0, 0, r, g, b, a],
+                [x + hx, y + hy, z + hz, 1, 0, 0, r, g, b, a],
+                [x + hx, y - hy, z + hz, 1, 0, 0, r, g, b, a],
+
+                [x + hx, y - hy, z + hz, 0, 0, 1, r, g, b, a],
+                [x + hx, y + hy, z + hz, 0, 0, 1, r, g, b, a],
+                [x - hx, y + hy, z + hz, 0, 0, 1, r, g, b, a],
+                [x - hx, y - hy, z + hz, 0, 0, 1, r, g, b, a],
+
+                [x + hx, y + hy, z + hz, 0, 1, 0, r, g, b, a],
+                [x + hx, y + hy, z - hz, 0, 1, 0, r, g, b, a],
+                [x - hx, y + hy, z - hz, 0, 1, 0, r, g, b, a],
+                [x - hx, y + hy, z + hz, 0, 1, 0, r, g, b, a],
+
+                [x - hx, y - hy, z + hz, -1, 0, 0, r, g, b, a],
+                [x - hx, y + hy, z + hz, -1, 0, 0, r, g, b, a],
+                [x - hx, y + hy, z - hz, -1, 0, 0, r, g, b, a],
+                [x - hx, y - hy, z - hz, -1, 0, 0, r, g, b, a],
+
+                [x - hx, y - hy, z - hz, 0, 0, -1, r, g, b, a],
+                [x - hx, y + hy, z - hz, 0, 0, -1, r, g, b, a],
+                [x + hx, y + hy, z - hz, 0, 0, -1, r, g, b, a],
+                [x + hx, y - hy, z - hz, 0, 0, -1, r, g, b, a],
+
+                [x - hx, y - hy, z + hz, 0, -1, 0, r, g, b, a],
+                [x - hx, y - hy, z - hz, 0, -1, 0, r, g, b, a],
+                [x + hx, y - hy, z - hz, 0, -1, 0, r, g, b, a],
+                [x + hx, y - hy, z + hz, 0, -1, 0, r, g, b, a],
+                ]
+
+    @property
+    def vertices(self):
+        """
+        The vertices of the voxel.
+
+        """
+        return self._vertices

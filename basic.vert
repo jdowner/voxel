@@ -8,6 +8,6 @@ void main()
 	gl_FrontColor = gl_Color;
 
   normal = normalize(gl_NormalMatrix * gl_Normal);
-  intensity = max(dot(normalize(light_position), normal), 0.2);
+  intensity = min(max(dot(normalize(light_position), normal), 0.2), 0.9);
 }
 
