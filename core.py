@@ -72,6 +72,14 @@ class Renderer(object):
         self._vbo_voxels = None
         self._voxels.append(voxel)
 
+    def add_voxels(self, voxels):
+        """
+        Adds an iterable of voxels to the renderer.
+
+        """
+        self._vbo_voxels = None
+        self._voxels.extend(v for v in voxels)
+
     def resize(self, width, height):
         """
         Sets the dimensions of the viewport and ensure that the frustum matches.
