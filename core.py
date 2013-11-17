@@ -72,6 +72,14 @@ class Renderer(object):
         self._vbo_voxels = None
         self._voxels.append(voxel)
 
+    def add_voxels(self, voxels):
+        """
+        Adds an iterable of voxels to the renderer.
+
+        """
+        self._vbo_voxels = None
+        self._voxels.extend(v for v in voxels)
+
     def resize(self, width, height):
         """
         Sets the dimensions of the viewport and ensure that the frustum matches.
@@ -175,8 +183,8 @@ class Renderer(object):
         Extract the vertices in the voxels and create the VBO.
 
         """
-        vertices = [v for q in self._voxels for v in q.vertices]
-        self._vbo_voxels = vbo.VBO(numpy.array(vertices, 'f'))
+        vertices = numpy.vstack(tuple(v.vertices for v in self._voxels))
+        self._vbo_voxels = vbo.VBO(vertices)
 
 
 class ShaderProgram(object):
@@ -917,6 +925,38 @@ class Voxel(object):
     rendering.
     """
 
+    OFFSETS = numpy.array([
+                [+1, -1, -1, +1, 0, 0, 0, 0, 0, 0],
+                [+1, +1, -1, +1, 0, 0, 0, 0, 0, 0],
+                [+1, +1, +1, +1, 0, 0, 0, 0, 0, 0],
+                [+1, -1, +1, +1, 0, 0, 0, 0, 0, 0],
+
+                [+1, -1, +1, 0, 0, +1, 0, 0, 0, 0],
+                [+1, +1, +1, 0, 0, +1, 0, 0, 0, 0],
+                [-1, +1, +1, 0, 0, +1, 0, 0, 0, 0],
+                [-1, -1, +1, 0, 0, +1, 0, 0, 0, 0],
+
+                [+1, +1, +1, 0, +1, 0, 0, 0, 0, 0],
+                [+1, +1, -1, 0, +1, 0, 0, 0, 0, 0],
+                [-1, +1, -1, 0, +1, 0, 0, 0, 0, 0],
+                [-1, +1, +1, 0, +1, 0, 0, 0, 0, 0],
+
+                [-1, -1, +1, -1, 0, 0, 0, 0, 0, 0],
+                [-1, +1, +1, -1, 0, 0, 0, 0, 0, 0],
+                [-1, +1, -1, -1, 0, 0, 0, 0, 0, 0],
+                [-1, -1, -1, -1, 0, 0, 0, 0, 0, 0],
+
+                [-1, -1, -1, 0, 0, -1, 0, 0, 0, 0],
+                [-1, +1, -1, 0, 0, -1, 0, 0, 0, 0],
+                [+1, +1, -1, 0, 0, -1, 0, 0, 0, 0],
+                [+1, -1, -1, 0, 0, -1, 0, 0, 0, 0],
+
+                [-1, -1, +1, 0, -1, 0, 0, 0, 0, 0],
+                [-1, -1, -1, 0, -1, 0, 0, 0, 0, 0],
+                [+1, -1, -1, 0, -1, 0, 0, 0, 0, 0],
+                [+1, -1, +1, 0, -1, 0, 0, 0, 0, 0],
+                ], dtype = numpy.float32)
+
     def __init__(self, x, y, z, hx, hy, hz, r, g, b, a):
         """
         Creates a voxel using (x, y, z) as the center of the voxel, (hx, hy, hz)
@@ -924,37 +964,13 @@ class Voxel(object):
         and (r, g, b, a) is a float32 RGBA color.
 
         """
-        self._vertices = [
-                [x + hx, y - hy, z - hz, 1, 0, 0, r, g, b, a],
-                [x + hx, y + hy, z - hz, 1, 0, 0, r, g, b, a],
-                [x + hx, y + hy, z + hz, 1, 0, 0, r, g, b, a],
-                [x + hx, y - hy, z + hz, 1, 0, 0, r, g, b, a],
+        scale = numpy.array([hx, hy, hz, 1, 1, 1, 1, 1, 1, 1], dtype=numpy.float32)
+        shift = numpy.array([x, y, z, 0, 0, 0, r, g, b, a], dtype=numpy.float32)
 
-                [x + hx, y - hy, z + hz, 0, 0, 1, r, g, b, a],
-                [x + hx, y + hy, z + hz, 0, 0, 1, r, g, b, a],
-                [x - hx, y + hy, z + hz, 0, 0, 1, r, g, b, a],
-                [x - hx, y - hy, z + hz, 0, 0, 1, r, g, b, a],
+        product = numpy.multiply(Voxel.OFFSETS, scale[numpy.newaxis,:])
 
-                [x + hx, y + hy, z + hz, 0, 1, 0, r, g, b, a],
-                [x + hx, y + hy, z - hz, 0, 1, 0, r, g, b, a],
-                [x - hx, y + hy, z - hz, 0, 1, 0, r, g, b, a],
-                [x - hx, y + hy, z + hz, 0, 1, 0, r, g, b, a],
+        self._vertices = numpy.add(product, shift[numpy.newaxis,:])
 
-                [x - hx, y - hy, z + hz, -1, 0, 0, r, g, b, a],
-                [x - hx, y + hy, z + hz, -1, 0, 0, r, g, b, a],
-                [x - hx, y + hy, z - hz, -1, 0, 0, r, g, b, a],
-                [x - hx, y - hy, z - hz, -1, 0, 0, r, g, b, a],
-
-                [x - hx, y - hy, z - hz, 0, 0, -1, r, g, b, a],
-                [x - hx, y + hy, z - hz, 0, 0, -1, r, g, b, a],
-                [x + hx, y + hy, z - hz, 0, 0, -1, r, g, b, a],
-                [x + hx, y - hy, z - hz, 0, 0, -1, r, g, b, a],
-
-                [x - hx, y - hy, z + hz, 0, -1, 0, r, g, b, a],
-                [x - hx, y - hy, z - hz, 0, -1, 0, r, g, b, a],
-                [x + hx, y - hy, z - hz, 0, -1, 0, r, g, b, a],
-                [x + hx, y - hy, z + hz, 0, -1, 0, r, g, b, a],
-                ]
 
     @property
     def vertices(self):
