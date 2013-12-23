@@ -87,6 +87,17 @@ class App(object):
 
         return bindings
  
+    def add_point(self, x, y, z, c):
+        """
+        Add a point to renderer. The point will be re-mapped to a 3D lattice
+        defined by the resolution of the app.
+        """
+        x = self.resolution * int(x / self.resolution)
+        y = self.resolution * int(y / self.resolution)
+        z = self.resolution * int(z / self.resolution)
+        h = 0.5 * self.resolution
+        self.renderer.add_voxel(core.Voxel(x, y, z, h, h, h, c.r, c.g, c.b, c.a))
+
     def resize(self, width, height):
         """
         Called when the window is resized. The height and width of the new
