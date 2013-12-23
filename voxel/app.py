@@ -240,3 +240,27 @@ class App(object):
         button, up, x, y = args
         if button == 0:
             self._last_mouse_press = (x, y) if not up else None
+
+
+class Config(object):
+    """
+    A utility class for represented a dictionary of nested data as an object.
+    """
+
+    def __init__(self, datadict):
+        """
+        Creates a Config object using the providing dictionary.
+
+        """
+        for k, v in datadict.items():
+            try:
+                setattr(self, k, Config(v))
+            except:
+                setattr(self, k, v)
+
+    def items(self):
+        """
+        Returns a list of the key-value pairs.
+
+        """
+        return self.__dict__.items()
