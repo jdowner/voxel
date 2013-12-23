@@ -157,20 +157,21 @@ class Renderer(object):
                     self._construct_vbo_voxels()
 
                 # Pass all of the data to the hardware
-                self._vbo_voxels.bind()
-                try:
-                    glEnableClientState(GL_VERTEX_ARRAY)
-                    glEnableClientState(GL_NORMAL_ARRAY)
-                    glEnableClientState(GL_COLOR_ARRAY)
-                    glVertexPointer(3, GL_FLOAT, 40, self._vbo_voxels)
-                    glNormalPointer(GL_FLOAT, 40, self._vbo_voxels + 12)
-                    glColorPointer(4, GL_FLOAT, 40, self._vbo_voxels + 24)
-                    glDrawArrays(GL_QUADS, 0, len(self._vbo_voxels))
-                finally:
-                    self._vbo_voxels.unbind()
-                    glDisableClientState(GL_VERTEX_ARRAY)
-                    glDisableClientState(GL_NORMAL_ARRAY)
-                    glDisableClientState(GL_COLOR_ARRAY)
+                if self._vbo_voxels is not None:
+                    self._vbo_voxels.bind()
+                    try:
+                        glEnableClientState(GL_VERTEX_ARRAY)
+                        glEnableClientState(GL_NORMAL_ARRAY)
+                        glEnableClientState(GL_COLOR_ARRAY)
+                        glVertexPointer(3, GL_FLOAT, 40, self._vbo_voxels)
+                        glNormalPointer(GL_FLOAT, 40, self._vbo_voxels + 12)
+                        glColorPointer(4, GL_FLOAT, 40, self._vbo_voxels + 24)
+                        glDrawArrays(GL_QUADS, 0, len(self._vbo_voxels))
+                    finally:
+                        self._vbo_voxels.unbind()
+                        glDisableClientState(GL_VERTEX_ARRAY)
+                        glDisableClientState(GL_NORMAL_ARRAY)
+                        glDisableClientState(GL_COLOR_ARRAY)
             except:
                 # @todo need to print out the relevant information and terminate
                 # execution.
@@ -183,8 +184,9 @@ class Renderer(object):
         Extract the vertices in the voxels and create the VBO.
 
         """
-        vertices = numpy.vstack(tuple(v.vertices for v in self._voxels))
-        self._vbo_voxels = vbo.VBO(vertices)
+        if len(self._voxels):
+            vertices = numpy.vstack(tuple(v.vertices for v in self._voxels))
+            self._vbo_voxels = vbo.VBO(vertices)
 
 
 class ShaderProgram(object):
