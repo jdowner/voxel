@@ -23,6 +23,16 @@ config = app.Config(yaml.load("""
         window:
             height: 600
             width: 800
+        bindings:
+            key_escape: exit
+            key_w: move_forward
+            key_s: move_backward
+            key_a: move_left
+            key_d: move_right
+            key_W: pitch_forward
+            key_S: pitch_backward
+            key_A: yaw_left
+            key_D: yaw_right
     """))
 
 def main():

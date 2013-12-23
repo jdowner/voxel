@@ -19,6 +19,15 @@ import OpenGL.GL.shaders as glsl
 import core
 
 
+def bindable(func):
+    """
+    Attaches the 'bindable' attribute to the provided function.
+
+    """
+    func.bindable = True
+    return func
+
+
 class App(object):
     """
     This class provides an interface that can be called by GLUT and exposes
@@ -26,18 +35,7 @@ class App(object):
     """
 
     def __init__(self, config):
-        # Initialize the key bindings and application state
-        self._keys = {}
-        self._keys['\x1b'] = self.exit
-        self._keys['w'] = self.move_forward
-        self._keys['s'] = self.move_backward
-        self._keys['a'] = self.move_left
-        self._keys['d'] = self.move_right
-
-        self._keys['W'] = self.pitch_forward
-        self._keys['S'] = self.pitch_backward
-        self._keys['A'] = self.yaw_left
-        self._keys['D'] = self.yaw_right
+        self._keys = self._create_key_bindings(config)
 
         self._last_mouse_press = None
         self._key_pressed = None
@@ -55,6 +53,27 @@ class App(object):
     def renderer(self):
         return self._renderer
 
+    def _create_key_bindings(self, config):
+        """
+        Bind keys to bindable functions.
+
+        """
+        bindings = {}
+        for key, func in config.app.bindings.items():
+            if key not in keymap:
+                raise ValueError('Unrecognized key -- %s' % (key,))
+
+            if not hasattr(self, func):
+                raise ValueError('Unrecognized binding -- %s' % (func,))
+
+            method = getattr(self, func)
+            if not hasattr(method, 'bindable'):
+                raise ValueError('%s is not a bindable function' % (func,))
+
+            bindings[keymap[key]] = getattr(self, func)
+
+        return bindings
+ 
     def resize(self, width, height):
         """
         Called when the window is resized. The height and width of the new
@@ -81,6 +100,7 @@ class App(object):
         """
         self.renderer.display()
 
+    @bindable
     def exit(self):
         """
         Forces the program to exit.
@@ -88,6 +108,7 @@ class App(object):
         """
         sys.exit(0)
 
+    @bindable
     def move_forward(self):
         """
         Moves the camera forward.
@@ -95,6 +116,7 @@ class App(object):
         """
         self.renderer.camera.move_forward(20.0)
 
+    @bindable
     def move_backward(self):
         """
         Moves the camera backward.
@@ -102,6 +124,7 @@ class App(object):
         """
         self.renderer.camera.move_backward(20.0)
 
+    @bindable
     def move_down(self):
         """
         Moves the camera down.
@@ -109,6 +132,7 @@ class App(object):
         """
         self.renderer.camera.move_down(20.0)
 
+    @bindable
     def move_up(self):
         """
         Moves the camera up.
@@ -116,6 +140,7 @@ class App(object):
         """
         self.renderer.camera.move_up(20.0)
 
+    @bindable
     def move_left(self):
         """
         Moves the camera left.
@@ -123,6 +148,7 @@ class App(object):
         """
         self.renderer.camera.move_left(20.0)
 
+    @bindable
     def move_right(self):
         """
         Moves the camera right.
@@ -130,6 +156,7 @@ class App(object):
         """
         self.renderer.camera.move_right(20.0)
 
+    @bindable
     def roll_left(self):
         """
         Rotates the camera to the left along the forward/backward axis.
@@ -137,6 +164,7 @@ class App(object):
         """
         self.renderer.camera.roll(math.pi / 120.0)
 
+    @bindable
     def roll_right(self):
         """
         Rotates the camera to the right along the forward/backward axis.
@@ -144,6 +172,7 @@ class App(object):
         """
         self.renderer.camera.roll(-math.pi / 120.0)
 
+    @bindable
     def pitch_forward(self):
         """
         Rotates the camera forward along the left/right axis
@@ -151,6 +180,7 @@ class App(object):
         """
         self.renderer.camera.pitch(-math.pi / 120.0)
 
+    @bindable
     def pitch_backward(self):
         """
         Rotates the camera backward along the left/right axis
@@ -158,6 +188,7 @@ class App(object):
         """
         self.renderer.camera.pitch(math.pi / 120.0)
 
+    @bindable
     def yaw_left(self):
         """
         Rotates the camera left along the vertical axis
@@ -165,6 +196,7 @@ class App(object):
         """
         self.renderer.camera.yaw(math.pi / 120.0)
 
+    @bindable
     def yaw_right(self):
         """
         Rotates the camera right along the vertical axis
@@ -232,6 +264,13 @@ class Config(object):
                 setattr(self, k, Config(v))
             except:
                 setattr(self, k, v)
+
+    def __repr__(self):
+        """
+        Returns the representation of the Config object.
+
+        """
+        return repr(self.__dict__)
 
     def items(self):
         """
