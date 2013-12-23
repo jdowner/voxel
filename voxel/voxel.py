@@ -13,14 +13,22 @@ from OpenGL.GL import (
 
 from OpenGL.GLUT import *
 
+import yaml
+
 import core
 import app
+
+config = app.Config(yaml.load("""
+    app:
+        window:
+            height: 600
+            width: 800
+    """))
 
 def main():
     # Parse command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('-v', '--verbose', action='store_true', default=False)
-    parser.add_argument('datafile')
 
     args = parser.parse_args()
 
@@ -36,7 +44,7 @@ def main():
     glutIgnoreKeyRepeat(1)
 
     # Create application and bind functions to GLUT
-    a = app.App(datafile = args.datafile)
+    a = app.App(config)
 
     glutDisplayFunc(a.display)
     glutIdleFunc(a.idle)

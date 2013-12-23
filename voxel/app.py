@@ -5,7 +5,6 @@ import math
 import sys
 import random
 
-import h5py
 import numpy
 import OpenGL
 OpenGL.ERROR_ON_COPY = True
@@ -22,11 +21,11 @@ import core
 
 class App(object):
     """
-    This class provides the an interface that can be called by GLUT and exposes
+    This class provides an interface that can be called by GLUT and exposes
     the high level functions that allow a user to interact with the scene.
     """
 
-    def __init__(self, datafile):
+    def __init__(self, config):
         # Initialize the key bindings and application state
         self._keys = {}
         self._keys['\x1b'] = self.exit
@@ -49,36 +48,12 @@ class App(object):
         program.load_fragment_shader('basic.frag')
         program.build()
 
-        self._renderer = core.Renderer(program, (800, 600))
-
-        # Now that the renderer has been created we can load the data.
-        self.load_data(datafile)
+        window = config.app.window
+        self._renderer = core.Renderer(program, (window.width, window.height))
 
     @property
     def renderer(self):
         return self._renderer
-
-    def load_data(self, filename):
-        """
-        Loads the data contained contained in the specified file. The file is
-        expected to be an HDF5 file.
-
-        """
-        with h5py.File(filename) as fp:
-            for group in fp:
-                r, g, b, a = core.Color.from_hsv(random.random(), 0.5, 0.95)
-                res = 10.0
-                def make_voxel(x, y, z):
-                    self._renderer.add_voxel(
-                            core.Voxel(x, y, z, res, res, res, r, g, b, a))
-
-                dataset = fp[group]
-                points = set()
-                for i in xrange(dataset.shape[0]):
-                    points.add(tuple(1000.0 * dataset[i,:3]))
-
-                for x, y, z in points:
-                    make_voxel(x, y, z)
 
     def resize(self, width, height):
         """
