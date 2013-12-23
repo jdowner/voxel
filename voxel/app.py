@@ -5,7 +5,6 @@ import math
 import sys
 import random
 
-import h5py
 import numpy
 import OpenGL
 OpenGL.ERROR_ON_COPY = True
@@ -20,26 +19,25 @@ import OpenGL.GL.shaders as glsl
 import core
 
 
+def bindable(func):
+    """
+    Attaches the 'bindable' attribute to the provided function.
+
+    """
+    func.bindable = True
+    return func
+
+
 class App(object):
     """
-    This class provides the an interface that can be called by GLUT and exposes
+    This class provides an interface that can be called by GLUT and exposes
     the high level functions that allow a user to interact with the scene.
     """
 
-    def __init__(self, datafile):
-        # Initialize the key bindings and application state
-        self._keys = {}
-        self._keys['\x1b'] = self.exit
-        self._keys['w'] = self.move_forward
-        self._keys['s'] = self.move_backward
-        self._keys['a'] = self.move_left
-        self._keys['d'] = self.move_right
+    def __init__(self, config):
+        self._keys = self._create_key_bindings(config)
 
-        self._keys['W'] = self.pitch_forward
-        self._keys['S'] = self.pitch_backward
-        self._keys['A'] = self.yaw_left
-        self._keys['D'] = self.yaw_right
-
+        self._resolution = config.app.resolution
         self._last_mouse_press = None
         self._key_pressed = None
 
@@ -49,36 +47,56 @@ class App(object):
         program.load_fragment_shader('basic.frag')
         program.build()
 
-        self._renderer = core.Renderer(program, (800, 600))
-
-        # Now that the renderer has been created we can load the data.
-        self.load_data(datafile)
+        window = config.app.window
+        self._renderer = core.Renderer(program, (window.width, window.height))
 
     @property
     def renderer(self):
+        """
+        The renderer used by the app.
+
+        """
         return self._renderer
 
-    def load_data(self, filename):
+    @property
+    def resolution(self):
         """
-        Loads the data contained contained in the specified file. The file is
-        expected to be an HDF5 file.
+        The length of an edge of a voxel.
 
         """
-        with h5py.File(filename) as fp:
-            for group in fp:
-                r, g, b, a = core.Color.from_hsv(random.random(), 0.5, 0.95)
-                res = 10.0
-                def make_voxel(x, y, z):
-                    self._renderer.add_voxel(
-                            core.Voxel(x, y, z, res, res, res, r, g, b, a))
+        return self._resolution
 
-                dataset = fp[group]
-                points = set()
-                for i in xrange(dataset.shape[0]):
-                    points.add(tuple(1000.0 * dataset[i,:3]))
+    def _create_key_bindings(self, config):
+        """
+        Bind keys to bindable functions.
 
-                for x, y, z in points:
-                    make_voxel(x, y, z)
+        """
+        bindings = {}
+        for key, func in config.app.bindings.items():
+            if key not in keymap:
+                raise ValueError('Unrecognized key -- %s' % (key,))
+
+            if not hasattr(self, func):
+                raise ValueError('Unrecognized binding -- %s' % (func,))
+
+            method = getattr(self, func)
+            if not hasattr(method, 'bindable'):
+                raise ValueError('%s is not a bindable function' % (func,))
+
+            bindings[keymap[key]] = getattr(self, func)
+
+        return bindings
+ 
+    def add_point(self, x, y, z, c):
+        """
+        Add a point to renderer. The point will be re-mapped to a 3D lattice
+        defined by the resolution of the app.
+        """
+        x = self.resolution * int(x / self.resolution)
+        y = self.resolution * int(y / self.resolution)
+        z = self.resolution * int(z / self.resolution)
+        h = 0.5 * self.resolution
+        self.renderer.add_voxel(core.Voxel(x, y, z, h, h, h, c.r, c.g, c.b, c.a))
 
     def resize(self, width, height):
         """
@@ -106,6 +124,7 @@ class App(object):
         """
         self.renderer.display()
 
+    @bindable
     def exit(self):
         """
         Forces the program to exit.
@@ -113,6 +132,7 @@ class App(object):
         """
         sys.exit(0)
 
+    @bindable
     def move_forward(self):
         """
         Moves the camera forward.
@@ -120,6 +140,7 @@ class App(object):
         """
         self.renderer.camera.move_forward(20.0)
 
+    @bindable
     def move_backward(self):
         """
         Moves the camera backward.
@@ -127,6 +148,7 @@ class App(object):
         """
         self.renderer.camera.move_backward(20.0)
 
+    @bindable
     def move_down(self):
         """
         Moves the camera down.
@@ -134,6 +156,7 @@ class App(object):
         """
         self.renderer.camera.move_down(20.0)
 
+    @bindable
     def move_up(self):
         """
         Moves the camera up.
@@ -141,6 +164,7 @@ class App(object):
         """
         self.renderer.camera.move_up(20.0)
 
+    @bindable
     def move_left(self):
         """
         Moves the camera left.
@@ -148,6 +172,7 @@ class App(object):
         """
         self.renderer.camera.move_left(20.0)
 
+    @bindable
     def move_right(self):
         """
         Moves the camera right.
@@ -155,6 +180,7 @@ class App(object):
         """
         self.renderer.camera.move_right(20.0)
 
+    @bindable
     def roll_left(self):
         """
         Rotates the camera to the left along the forward/backward axis.
@@ -162,6 +188,7 @@ class App(object):
         """
         self.renderer.camera.roll(math.pi / 120.0)
 
+    @bindable
     def roll_right(self):
         """
         Rotates the camera to the right along the forward/backward axis.
@@ -169,6 +196,7 @@ class App(object):
         """
         self.renderer.camera.roll(-math.pi / 120.0)
 
+    @bindable
     def pitch_forward(self):
         """
         Rotates the camera forward along the left/right axis
@@ -176,6 +204,7 @@ class App(object):
         """
         self.renderer.camera.pitch(-math.pi / 120.0)
 
+    @bindable
     def pitch_backward(self):
         """
         Rotates the camera backward along the left/right axis
@@ -183,6 +212,7 @@ class App(object):
         """
         self.renderer.camera.pitch(math.pi / 120.0)
 
+    @bindable
     def yaw_left(self):
         """
         Rotates the camera left along the vertical axis
@@ -190,6 +220,7 @@ class App(object):
         """
         self.renderer.camera.yaw(math.pi / 120.0)
 
+    @bindable
     def yaw_right(self):
         """
         Rotates the camera right along the vertical axis
@@ -240,3 +271,91 @@ class App(object):
         button, up, x, y = args
         if button == 0:
             self._last_mouse_press = (x, y) if not up else None
+
+
+class Config(object):
+    """
+    A utility class for represented a dictionary of nested data as an object.
+    """
+
+    def __init__(self, datadict):
+        """
+        Creates a Config object using the providing dictionary.
+
+        """
+        for k, v in datadict.items():
+            try:
+                setattr(self, k, Config(v))
+            except:
+                setattr(self, k, v)
+
+    def __repr__(self):
+        """
+        Returns the representation of the Config object.
+
+        """
+        return repr(self.__dict__)
+
+    def items(self):
+        """
+        Returns a list of the key-value pairs.
+
+        """
+        return self.__dict__.items()
+
+
+keymap = {
+        'key_escape': '\x1b',
+        'key_a': 'a',
+        'key_b': 'b',
+        'key_c': 'c',
+        'key_d': 'd',
+        'key_e': 'e',
+        'key_f': 'f',
+        'key_g': 'g',
+        'key_h': 'h',
+        'key_i': 'i',
+        'key_j': 'j',
+        'key_k': 'k',
+        'key_l': 'l',
+        'key_m': 'm',
+        'key_n': 'n',
+        'key_o': 'o',
+        'key_p': 'p',
+        'key_q': 'q',
+        'key_r': 'r',
+        'key_s': 's',
+        'key_t': 't',
+        'key_u': 'u',
+        'key_v': 'v',
+        'key_w': 'w',
+        'key_x': 'x',
+        'key_y': 'y',
+        'key_z': 'z',
+        'key_A': 'A',
+        'key_B': 'B',
+        'key_C': 'C',
+        'key_D': 'D',
+        'key_E': 'E',
+        'key_F': 'F',
+        'key_G': 'G',
+        'key_H': 'H',
+        'key_I': 'I',
+        'key_J': 'J',
+        'key_K': 'K',
+        'key_L': 'L',
+        'key_M': 'M',
+        'key_N': 'N',
+        'key_O': 'O',
+        'key_P': 'P',
+        'key_Q': 'Q',
+        'key_R': 'R',
+        'key_S': 'S',
+        'key_T': 'T',
+        'key_U': 'U',
+        'key_V': 'V',
+        'key_W': 'W',
+        'key_X': 'X',
+        'key_Y': 'Y',
+        'key_Z': 'Z',
+   }
