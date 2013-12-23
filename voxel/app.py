@@ -37,6 +37,7 @@ class App(object):
     def __init__(self, config):
         self._keys = self._create_key_bindings(config)
 
+        self._resolution = config.app.resolution
         self._last_mouse_press = None
         self._key_pressed = None
 
@@ -51,7 +52,19 @@ class App(object):
 
     @property
     def renderer(self):
+        """
+        The renderer used by the app.
+
+        """
         return self._renderer
+
+    @property
+    def resolution(self):
+        """
+        The length of an edge of a voxel.
+
+        """
+        return self._resolution
 
     def _create_key_bindings(self, config):
         """
