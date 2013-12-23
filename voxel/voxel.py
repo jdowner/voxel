@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
+import random
 import sys
 
 from OpenGL.GL import (
@@ -18,27 +19,42 @@ import yaml
 import core
 import app
 
-config = app.Config(yaml.load("""
-    app:
-        window:
-            height: 600
-            width: 800
-        bindings:
-            key_escape: exit
-            key_w: move_forward
-            key_s: move_backward
-            key_a: move_left
-            key_d: move_right
-            key_W: pitch_forward
-            key_S: pitch_backward
-            key_A: yaw_left
-            key_D: yaw_right
-    """))
+
+class VoxelApp(app.App):
+    def __init__(self):
+        config = app.Config(yaml.load("""
+            app:
+                window:
+                    height: 600
+                    width: 800
+                bindings:
+                    key_escape: exit
+                    key_w: move_forward
+                    key_s: move_backward
+                    key_a: move_left
+                    key_d: move_right
+                    key_W: pitch_forward
+                    key_S: pitch_backward
+                    key_A: yaw_left
+                    key_D: yaw_right
+                resolution: 100.0
+            """))
+
+        super(VoxelApp, self).__init__(config)
+
+    def load(self, filename):
+        with open(filename) as fd:
+            for line in fd:
+                x, y, z = map(float, line.strip().split(' '))
+                color = core.Color.from_hsv(random.random(), 0.95, 0.5)
+                self.add_point(x, y, z, color)
+
 
 def main():
     # Parse command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('-v', '--verbose', action='store_true', default=False)
+    parser.add_argument('files', nargs=argparse.REMAINDER)
 
     args = parser.parse_args()
 
@@ -54,7 +70,10 @@ def main():
     glutIgnoreKeyRepeat(1)
 
     # Create application and bind functions to GLUT
-    a = app.App(config)
+    a = VoxelApp()
+
+    for f in args.files:
+        a.load(f)
 
     glutDisplayFunc(a.display)
     glutIdleFunc(a.idle)
