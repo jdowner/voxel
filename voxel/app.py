@@ -38,7 +38,10 @@ class App(object):
         self._keys = self._create_key_bindings(config)
 
         self._resolution = config.app.resolution
+        self._sensitivity = config.app.sensitivity
+
         self._last_mouse_press = None
+        self._last_orientation = None
         self._key_pressed = None
 
         # Build the shader program so that the renderer can be created.
@@ -62,6 +65,14 @@ class App(object):
 
         """
         return self._resolution
+
+    @property
+    def sensitivity(self):
+        """
+        The mouse sensitivity.
+
+        """
+        return self._sensitivity
 
     def _create_key_bindings(self, config):
         """
@@ -269,8 +280,15 @@ class App(object):
             x0, y0 = self._last_mouse_press
             delta_x = xn - x0
             delta_y = yn - y0
-            self.renderer.camera.yaw(-0.001 * delta_x * math.pi / 360.0)
-            self.renderer.camera.pitch(-0.001 * delta_y * math.pi / 360.0)
+            scale = self.sensitivity * math.pi / 360.0
+
+            # reset the camera to its original orientation
+            self.renderer.camera.orientation = self._last_orientation
+
+            # now move the camera to the new orientation relative to its
+            # original orientation
+            self.renderer.camera.yaw(-scale * delta_x)
+            self.renderer.camera.pitch(-scale * delta_y)
 
     def mouse_press(self, *args):
         """
@@ -286,7 +304,12 @@ class App(object):
         """
         button, up, x, y = args
         if button == 0:
-            self._last_mouse_press = (x, y) if not up else None
+            if up:
+                self._last_mouse_press = None
+                self._last_orientation = None
+            else:
+                self._last_mouse_press = (x, y)
+                self._last_orientation = self.renderer.camera.orientation
 
 
 class Config(object):

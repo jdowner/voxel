@@ -38,6 +38,7 @@ class VoxelApp(app.App):
                     key_A: yaw_left
                     key_D: yaw_right
                 resolution: 100.0
+                sensitivity: 0.1
             shaders:
                 vertex: ['basic.vert']
                 fragment: ['basic.frag']
