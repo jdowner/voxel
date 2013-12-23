@@ -1,0 +1,3 @@
+#!/bin/bash
+
+PYTHONPATH=voxel:${PYTHONPATH} python -m unittest discover

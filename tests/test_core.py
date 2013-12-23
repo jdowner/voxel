@@ -151,18 +151,7 @@ class TestCamera(unittest.TestCase):
         for _ in xrange(27):
             self.camera.yaw(math.pi / 12.0)
 
-        print('right',self.camera.right)
-        print('up',self.camera.up)
-        print('forward',self.camera.forward)
-        #self.assertTrue(numpy.allclose(self.e1, self.camera.right))
-
         self.camera.move_right(math.sqrt(2.0))
-
-        print(self.camera.position)
-
-        print(self.camera.orientation.angle())
-        print(self.camera.orientation.axis())
-
 
 
 if __name__ == "__main__":
