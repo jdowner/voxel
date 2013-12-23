@@ -42,12 +42,9 @@ class App(object):
         self._key_pressed = None
 
         # Build the shader program so that the renderer can be created.
-        program = core.ShaderProgram();
-        program.load_vertex_shader('basic.vert')
-        program.load_fragment_shader('basic.frag')
-        program.build()
-
         window = config.app.window
+        shaders = config.shaders
+        program = self._create_shader_program(shaders.vertex, shaders.fragment)
         self._renderer = core.Renderer(program, (window.width, window.height))
 
     @property
@@ -86,6 +83,25 @@ class App(object):
             bindings[keymap[key]] = getattr(self, func)
 
         return bindings
+
+    def _create_shader_program(self, vertex_shaders, fragment_shaders):
+        """
+        Creates a shader program from the provided shaders, which are lists of
+        paths to the vertex and fragment shaders respectively.
+
+        """
+        program = core.ShaderProgram()
+
+        for shader in vertex_shaders:
+            program.load_vertex_shader(shader)
+
+        for shader in fragment_shaders:
+            program.load_fragment_shader(shader)
+
+        program.build()
+
+        return program
+
  
     def add_point(self, x, y, z, c):
         """

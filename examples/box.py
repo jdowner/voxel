@@ -38,23 +38,18 @@ class VoxelApp(app.App):
                     key_A: yaw_left
                     key_D: yaw_right
                 resolution: 100.0
+            shaders:
+                vertex: ['basic.vert']
+                fragment: ['basic.frag']
             """))
 
         super(VoxelApp, self).__init__(config)
-
-    def load(self, filename):
-        with open(filename) as fd:
-            for line in fd:
-                x, y, z = map(float, line.strip().split(' '))
-                color = core.Color.from_hsv(random.random(), 0.95, 0.5)
-                self.add_point(x, y, z, color)
-
+        self.add_point(0, 0, 0, core.Color(1,1,1,1))
 
 def main():
     # Parse command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('-v', '--verbose', action='store_true', default=False)
-    parser.add_argument('files', nargs=argparse.REMAINDER)
 
     args = parser.parse_args()
 
@@ -71,9 +66,6 @@ def main():
 
     # Create application and bind functions to GLUT
     a = VoxelApp()
-
-    for f in args.files:
-        a.load(f)
 
     glutDisplayFunc(a.display)
     glutIdleFunc(a.idle)
