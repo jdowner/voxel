@@ -112,12 +112,12 @@ class App(object):
         program.build()
 
         return program
-
  
     def add_point(self, x, y, z, c):
         """
         Add a point to renderer. The point will be re-mapped to a 3D lattice
-        defined by the resolution of the app.
+        defined by the resolution of the app with the specified color.
+
         """
         x = self.resolution * int(x / self.resolution)
         y = self.resolution * int(y / self.resolution)
