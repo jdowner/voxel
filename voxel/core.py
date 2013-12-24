@@ -63,6 +63,14 @@ class Renderer(object):
         """
         return self._camera
 
+    @property
+    def frustum(self):
+        """
+        The frustum that defines the viewing volume of the camera.
+
+        """
+        return self._frustum
+
     def add_voxel(self, voxel):
         """
         Add a voxel to the renderer.
@@ -90,7 +98,7 @@ class Renderer(object):
 
         glViewport(0, 0, width, height)
 
-        self._frustum.resize((width, height))
+        self.frustum.resize((width, height))
 
     def _render_fiducials(self):
         """
@@ -352,6 +360,22 @@ class Frustum(object):
         return self._depth
 
     @property
+    def near(self):
+        """
+        The distance to the near plane.
+
+        """
+        return self.width * math.tan(self.fov * math.pi / 180.0)
+
+    @property
+    def far(self):
+        """
+        The distance to the far plane.
+
+        """
+        return self.depth + self.near
+
+    @property
     def fov(self):
         """
         The field of view (degrees).
@@ -367,15 +391,13 @@ class Frustum(object):
         self._width = width
         self._height = height
 
-        near = self.width * math.tan(self.fov * math.pi / 180.0)
-        far = self.depth + near
-
         half_width = self.width / 2.0
         half_height = self.height / 2.0
 
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
-        glFrustum(-half_width, half_width, -half_height, half_height, near, far)
+        glFrustum(-half_width, half_width, -half_height, half_height, self.near,
+                self.far)
 
 
 class Camera(object):
