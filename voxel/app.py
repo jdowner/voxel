@@ -39,6 +39,8 @@ class App(object):
 
         self._resolution = config.app.resolution
         self._sensitivity = config.app.sensitivity
+        self._linear_speed = config.app.linear_speed
+        self._angular_speed = config.app.angular_speed
 
         self._last_mouse_press = None
         self._last_orientation = None
@@ -73,6 +75,22 @@ class App(object):
 
         """
         return self._sensitivity
+
+    @property
+    def linear_speed(self):
+        """
+        The maximum linear speed of the camera.
+
+        """
+        return self._linear_speed
+
+    @property
+    def angular_speed(self):
+        """
+        The maximum angular speed of the camera.
+
+        """
+        return self._angular_speed
 
     def _create_key_bindings(self, config):
         """
