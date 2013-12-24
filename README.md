@@ -1,4 +1,4 @@
-VOXEL
+Voxel
 ==================================================
 
 This is a toy voxel engine written in python using PyOpenGL.
@@ -17,7 +17,7 @@ The App class is intended to provide a base class that can be extended to
 customize user interaction or how the data is manipulated.
 
 
-REQUIREMENTS
+Requirements
 ==================================================
 
 Voxel is written in python-2.7 and requires the following python packages:
