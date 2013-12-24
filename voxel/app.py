@@ -38,7 +38,8 @@ class App(object):
         self._keys = self._create_key_bindings(config)
 
         self._resolution = config.app.resolution
-        self._sensitivity = config.app.sensitivity
+        self._linear_speed = config.app.linear_speed
+        self._angular_speed = config.app.angular_speed
 
         self._last_mouse_press = None
         self._last_orientation = None
@@ -67,12 +68,20 @@ class App(object):
         return self._resolution
 
     @property
-    def sensitivity(self):
+    def linear_speed(self):
         """
-        The mouse sensitivity.
+        The linear speed of the camera.
 
         """
-        return self._sensitivity
+        return self._linear_speed
+
+    @property
+    def angular_speed(self):
+        """
+        The angular speed of the camera.
+
+        """
+        return self._angular_speed
 
     def _create_key_bindings(self, config):
         """
@@ -112,12 +121,12 @@ class App(object):
         program.build()
 
         return program
-
  
     def add_point(self, x, y, z, c):
         """
         Add a point to renderer. The point will be re-mapped to a 3D lattice
-        defined by the resolution of the app.
+        defined by the resolution of the app with the specified color.
+
         """
         x = self.resolution * int(x / self.resolution)
         y = self.resolution * int(y / self.resolution)
@@ -165,7 +174,7 @@ class App(object):
         Moves the camera forward.
 
         """
-        self.renderer.camera.move_forward(20.0)
+        self.renderer.camera.move_forward(self.linear_speed)
 
     @bindable
     def move_backward(self):
@@ -173,7 +182,7 @@ class App(object):
         Moves the camera backward.
 
         """
-        self.renderer.camera.move_backward(20.0)
+        self.renderer.camera.move_backward(self.linear_speed)
 
     @bindable
     def move_down(self):
@@ -181,7 +190,7 @@ class App(object):
         Moves the camera down.
 
         """
-        self.renderer.camera.move_down(20.0)
+        self.renderer.camera.move_down(self.linear_speed)
 
     @bindable
     def move_up(self):
@@ -189,7 +198,7 @@ class App(object):
         Moves the camera up.
 
         """
-        self.renderer.camera.move_up(20.0)
+        self.renderer.camera.move_up(self.linear_speed)
 
     @bindable
     def move_left(self):
@@ -197,7 +206,7 @@ class App(object):
         Moves the camera left.
 
         """
-        self.renderer.camera.move_left(20.0)
+        self.renderer.camera.move_left(self.linear_speed)
 
     @bindable
     def move_right(self):
@@ -205,7 +214,7 @@ class App(object):
         Moves the camera right.
 
         """
-        self.renderer.camera.move_right(20.0)
+        self.renderer.camera.move_right(self.linear_speed)
 
     @bindable
     def roll_left(self):
@@ -213,7 +222,7 @@ class App(object):
         Rotates the camera to the left along the forward/backward axis.
 
         """
-        self.renderer.camera.roll(math.pi / 120.0)
+        self.renderer.camera.roll(self.angular_speed)
 
     @bindable
     def roll_right(self):
@@ -221,7 +230,7 @@ class App(object):
         Rotates the camera to the right along the forward/backward axis.
 
         """
-        self.renderer.camera.roll(-math.pi / 120.0)
+        self.renderer.camera.roll(-self.angular_speed)
 
     @bindable
     def pitch_forward(self):
@@ -229,7 +238,7 @@ class App(object):
         Rotates the camera forward along the left/right axis
 
         """
-        self.renderer.camera.pitch(-math.pi / 120.0)
+        self.renderer.camera.pitch(-self.angular_speed)
 
     @bindable
     def pitch_backward(self):
@@ -237,7 +246,7 @@ class App(object):
         Rotates the camera backward along the left/right axis
 
         """
-        self.renderer.camera.pitch(math.pi / 120.0)
+        self.renderer.camera.pitch(self.angular_speed)
 
     @bindable
     def yaw_left(self):
@@ -245,7 +254,7 @@ class App(object):
         Rotates the camera left along the vertical axis
 
         """
-        self.renderer.camera.yaw(math.pi / 120.0)
+        self.renderer.camera.yaw(self.angular_speed)
 
     @bindable
     def yaw_right(self):
@@ -253,7 +262,7 @@ class App(object):
         Rotates the camera right along the vertical axis
 
         """
-        self.renderer.camera.yaw(-math.pi / 120.0)
+        self.renderer.camera.yaw(-self.angular_speed)
 
     def keyboard(self, *args):
         """
@@ -278,9 +287,13 @@ class App(object):
         xn, yn = args
         if self._last_mouse_press:
             x0, y0, modifiers = self._last_mouse_press
-            delta_x = xn - x0
-            delta_y = yn - y0
-            scale = self.sensitivity * math.pi / 360.0
+            dx = xn - x0
+            dy = yn - y0
+            delta = math.sqrt(dx * dx + dy * dy)
+            if abs(delta) < 0.001:
+                return
+
+            theta = math.atan2(delta, self.renderer.frustum.near)
 
             # reset the camera to its original orientation
             self.renderer.camera.orientation = self._last_orientation
@@ -288,10 +301,10 @@ class App(object):
             # now move the camera to the new orientation relative to its
             # original orientation
             if modifiers == GLUT_ACTIVE_SHIFT:
-                self.renderer.camera.roll(-3.0 * scale * delta_x)
+                self.renderer.camera.roll(3.0 * theta * dx / delta)
             else:
-                self.renderer.camera.yaw(-scale * delta_x)
-                self.renderer.camera.pitch(-scale * delta_y)
+                self.renderer.camera.yaw(-theta * dx / delta)
+                self.renderer.camera.pitch(-theta * dy / delta)
 
     def mouse_press(self, *args):
         """
