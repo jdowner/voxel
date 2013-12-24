@@ -38,7 +38,6 @@ class App(object):
         self._keys = self._create_key_bindings(config)
 
         self._resolution = config.app.resolution
-        self._sensitivity = config.app.sensitivity
         self._linear_speed = config.app.linear_speed
         self._angular_speed = config.app.angular_speed
 
@@ -67,14 +66,6 @@ class App(object):
 
         """
         return self._resolution
-
-    @property
-    def sensitivity(self):
-        """
-        The mouse sensitivity.
-
-        """
-        return self._sensitivity
 
     @property
     def linear_speed(self):
