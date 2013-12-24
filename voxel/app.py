@@ -296,9 +296,13 @@ class App(object):
         xn, yn = args
         if self._last_mouse_press:
             x0, y0, modifiers = self._last_mouse_press
-            delta_x = xn - x0
-            delta_y = yn - y0
-            scale = self.sensitivity * math.pi / 360.0
+            dx = xn - x0
+            dy = yn - y0
+            delta = math.sqrt(dx * dx + dy * dy)
+            if abs(delta) < 0.001:
+                return
+
+            theta = math.atan2(delta, self.renderer.frustum.near)
 
             # reset the camera to its original orientation
             self.renderer.camera.orientation = self._last_orientation
@@ -306,10 +310,10 @@ class App(object):
             # now move the camera to the new orientation relative to its
             # original orientation
             if modifiers == GLUT_ACTIVE_SHIFT:
-                self.renderer.camera.roll(-3.0 * scale * delta_x)
+                self.renderer.camera.roll(3.0 * theta * dx / delta)
             else:
-                self.renderer.camera.yaw(-scale * delta_x)
-                self.renderer.camera.pitch(-scale * delta_y)
+                self.renderer.camera.yaw(-theta * dx / delta)
+                self.renderer.camera.pitch(-theta * dy / delta)
 
     def mouse_press(self, *args):
         """
