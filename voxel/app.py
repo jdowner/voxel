@@ -79,7 +79,7 @@ class App(object):
     @property
     def linear_speed(self):
         """
-        The maximum linear speed of the camera.
+        The linear speed of the camera.
 
         """
         return self._linear_speed
@@ -87,7 +87,7 @@ class App(object):
     @property
     def angular_speed(self):
         """
-        The maximum angular speed of the camera.
+        The angular speed of the camera.
 
         """
         return self._angular_speed
@@ -183,7 +183,7 @@ class App(object):
         Moves the camera forward.
 
         """
-        self.renderer.camera.move_forward(20.0)
+        self.renderer.camera.move_forward(self.linear_speed)
 
     @bindable
     def move_backward(self):
@@ -191,7 +191,7 @@ class App(object):
         Moves the camera backward.
 
         """
-        self.renderer.camera.move_backward(20.0)
+        self.renderer.camera.move_backward(self.linear_speed)
 
     @bindable
     def move_down(self):
@@ -199,7 +199,7 @@ class App(object):
         Moves the camera down.
 
         """
-        self.renderer.camera.move_down(20.0)
+        self.renderer.camera.move_down(self.linear_speed)
 
     @bindable
     def move_up(self):
@@ -207,7 +207,7 @@ class App(object):
         Moves the camera up.
 
         """
-        self.renderer.camera.move_up(20.0)
+        self.renderer.camera.move_up(self.linear_speed)
 
     @bindable
     def move_left(self):
@@ -215,7 +215,7 @@ class App(object):
         Moves the camera left.
 
         """
-        self.renderer.camera.move_left(20.0)
+        self.renderer.camera.move_left(self.linear_speed)
 
     @bindable
     def move_right(self):
@@ -223,7 +223,7 @@ class App(object):
         Moves the camera right.
 
         """
-        self.renderer.camera.move_right(20.0)
+        self.renderer.camera.move_right(self.linear_speed)
 
     @bindable
     def roll_left(self):
@@ -231,7 +231,7 @@ class App(object):
         Rotates the camera to the left along the forward/backward axis.
 
         """
-        self.renderer.camera.roll(math.pi / 120.0)
+        self.renderer.camera.roll(self.angular_speed)
 
     @bindable
     def roll_right(self):
@@ -239,7 +239,7 @@ class App(object):
         Rotates the camera to the right along the forward/backward axis.
 
         """
-        self.renderer.camera.roll(-math.pi / 120.0)
+        self.renderer.camera.roll(-self.angular_speed)
 
     @bindable
     def pitch_forward(self):
@@ -247,7 +247,7 @@ class App(object):
         Rotates the camera forward along the left/right axis
 
         """
-        self.renderer.camera.pitch(-math.pi / 120.0)
+        self.renderer.camera.pitch(-self.angular_speed)
 
     @bindable
     def pitch_backward(self):
@@ -255,7 +255,7 @@ class App(object):
         Rotates the camera backward along the left/right axis
 
         """
-        self.renderer.camera.pitch(math.pi / 120.0)
+        self.renderer.camera.pitch(self.angular_speed)
 
     @bindable
     def yaw_left(self):
@@ -263,7 +263,7 @@ class App(object):
         Rotates the camera left along the vertical axis
 
         """
-        self.renderer.camera.yaw(math.pi / 120.0)
+        self.renderer.camera.yaw(self.angular_speed)
 
     @bindable
     def yaw_right(self):
@@ -271,7 +271,7 @@ class App(object):
         Rotates the camera right along the vertical axis
 
         """
-        self.renderer.camera.yaw(-math.pi / 120.0)
+        self.renderer.camera.yaw(-self.angular_speed)
 
     def keyboard(self, *args):
         """
