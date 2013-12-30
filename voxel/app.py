@@ -351,6 +351,14 @@ class Config(object):
         """
         return repr(self.__dict__)
 
+    def __contains__(self, key):
+        """
+        Returns True is the given key is in this config object. This method does
+        not recurse through the hierarchy but only tests this object.
+
+        """
+        return key in self.__dict__
+
     def items(self):
         """
         Returns a list of the key-value pairs.
