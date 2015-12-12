@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import argparse
-import random
 import sys
 
 from OpenGL.GL import (
@@ -16,13 +15,13 @@ from OpenGL.GLUT import *
 
 import yaml
 
-import core
-import app
+import voxel.core
+import voxel.app
 
 
-class VoxelApp(app.App):
+class VoxelApp(voxel.app.App):
     def __init__(self):
-        config = app.Config(yaml.load("""
+        config = voxel.app.Config(yaml.load("""
             app:
                 window:
                     height: 600
@@ -46,7 +45,7 @@ class VoxelApp(app.App):
             """))
 
         super(VoxelApp, self).__init__(config)
-        self.add_point(0, 0, 0, core.Color(1,1,1,1))
+        self.add_point(0, 0, 0, voxel.core.Color(1,1,1,1))
 
 def main():
     # Parse command line arguments
@@ -56,7 +55,7 @@ def main():
     args = parser.parse_args()
 
     if args.verbose:
-        core.set_log_level('debug')
+        voxel.core.set_log_level('debug')
 
     # Initialize the window
     glutInit(sys.argv)
@@ -78,12 +77,12 @@ def main():
     glutMotionFunc(a.mouse_move)
 
     # Log diagnostic information
-    core.log.debug("GL_RENDERER   = %s" % (glGetString(GL_RENDERER),))
-    core.log.debug("GL_VERSION    = %s" % (glGetString(GL_VERSION),))
-    core.log.debug("GL_VENDOR     = %s" % (glGetString(GL_VENDOR),))
-    core.log.debug("GL_EXTENSIONS = ")
+    voxel.core.log.debug("GL_RENDERER   = %s" % (glGetString(GL_RENDERER),))
+    voxel.core.log.debug("GL_VERSION    = %s" % (glGetString(GL_VERSION),))
+    voxel.core.log.debug("GL_VENDOR     = %s" % (glGetString(GL_VENDOR),))
+    voxel.core.log.debug("GL_EXTENSIONS = ")
     for ext in sorted(glGetString(GL_EXTENSIONS).split()):
-        core.log.debug("  %s" % (ext,))
+        voxel.core.log.debug("  %s" % (ext,))
 
     glutMainLoop()
 
