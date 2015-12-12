@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 
 import argparse
+import itertools
 import logging
+import math
+import random
 import sys
 
-log = logging.getLogger('voxel.examples.box')
+log = logging.getLogger('voxel.examples.sphere')
 
 from OpenGL.GL import (
         glGetString,
@@ -70,7 +73,7 @@ class VoxelApp(voxel.app.App):
                     key_S: pitch_backward
                     key_A: yaw_left
                     key_D: yaw_right
-                resolution: 100.0
+                resolution: 20.0
                 linear_speed: 20.0
                 angular_speed: 0.02617993877
             """))
@@ -89,7 +92,23 @@ class VoxelApp(voxel.app.App):
 
         super(VoxelApp, self).__init__(config, renderer)
 
-        self.add_point(0, 0, 0, voxel.core.Color(1,1,1,1))
+        points = set()
+
+        r = 1000.0
+        for _ in xrange(10000):
+            x = random.random()
+            y = random.random()
+            h = 1.0 - x * x - y * y
+            if h < 0.0:
+                continue
+            z = math.sqrt(h)
+            for u, v, w in itertools.product([-r, r], repeat=3):
+                points.add((u * x, v * y, w * z))
+
+        for x, y, z in points:
+            c = voxel.core.Color(1,1,1,1)
+            self.add_point(x, y, z, c)
+
 
 def main():
     # Parse command line arguments
@@ -127,7 +146,7 @@ def main():
     log.debug("GL_VENDOR     = %s" % (glGetString(GL_VENDOR),))
     log.debug("GL_EXTENSIONS = ")
     for ext in sorted(glGetString(GL_EXTENSIONS).split()):
-        voxel.core.log.debug("  %s" % (ext,))
+        log.debug("  %s" % (ext,))
 
     glutMainLoop()
 
