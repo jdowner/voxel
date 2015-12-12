@@ -55,7 +55,8 @@ def main():
     args = parser.parse_args()
 
     if args.verbose:
-        voxel.core.set_log_level('debug')
+        level = logging.DEBUG if args.verbose else logging.ERROR
+        logging.getLogger('voxel').setLevel(level)
 
     # Initialize the window
     glutInit(sys.argv)

@@ -1,5 +1,4 @@
 import itertools
-import logging
 import sys
 import math
 
@@ -13,23 +12,6 @@ from OpenGL.GLUT import *
 
 # PyOpenGL 3.0.1 introduces this convenience module...
 import OpenGL.GL.shaders as glsl
-
-LOGLEVEL = {
-        'debug':    logging.DEBUG,
-        'info':     logging.INFO,
-        'warning':  logging.WARNING,
-        'error':    logging.ERROR,
-        'critical': logging.CRITICAL}
-
-# Set up the logger
-log = logging.getLogger(__name__)
-formatter = logging.Formatter('%(asctime)s:%(levelname)s: %(message)s')
-sh = logging.StreamHandler()
-sh.setFormatter(formatter)
-log.addHandler(sh)
-
-def set_log_level(level):
-    log.setLevel(LOGLEVEL[level.lower()])
 
 
 class Renderer(object):
