@@ -1,22 +1,9 @@
 #!/usr/bin/python2
 
-import logging
 import math
 import sys
-import random
 
-import numpy
-import OpenGL
-OpenGL.ERROR_ON_COPY = True
-
-from OpenGL.arrays import vbo
-from OpenGL.GL import *
-from OpenGL.GLUT import *
-
-# PyOpenGL 3.0.1 introduces this convenience module...
-import OpenGL.GL.shaders as glsl
-
-import core
+from . import core
 
 
 def bindable(func):
