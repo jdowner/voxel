@@ -224,12 +224,16 @@ class ShaderProgram(object):
 
     def load_vertex_shader(self, filename):
         """
-        Loads the specified vertex shader.
+        Loads and compiles the specified vertex shader.
 
         """
-        with open(filename) as fp:
-            shader = fp.read()
+        self.compile_vertex_shader(open(filename).read())
 
+    def compile_vertex_shader(self, shader):
+        """
+        Compiles a vertex shader
+
+        """
         try:
             self._vertex_shaders.append(glsl.compileShader(shader, GL_VERTEX_SHADER))
         except RuntimeError as e:
@@ -242,12 +246,16 @@ class ShaderProgram(object):
 
     def load_fragment_shader(self, filename):
         """
-        Loads the specified fragment shader.
+        Loads and compiles the specified fragment shader.
 
         """
-        with open(filename) as fp:
-            shader = fp.read()
+        self.compile_fragment_shader(open(filename).read())
 
+    def compile_fragment_shader(self, shader):
+        """
+        Compiles the specified fragment shader.
+
+        """
         try:
             self._fragment_shaders.append(glsl.compileShader(shader, GL_FRAGMENT_SHADER))
         except RuntimeError as e:
