@@ -18,6 +18,37 @@ import yaml
 import voxel.core
 import voxel.app
 
+fragment_shader = """
+uniform vec3 light_position;
+varying float intensity;
+
+void main()
+{
+  vec4 color = gl_Color;
+  color.x = intensity * color.x;
+  color.y = intensity * color.y;
+  color.z = intensity * color.z;
+
+  gl_FragColor = color;
+}
+"""
+
+vertex_shader = """
+uniform vec3 light_position;
+varying vec3 normal;
+varying float intensity;
+
+void main()
+{
+	gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+	gl_FrontColor = gl_Color;
+
+  normal = normalize(gl_NormalMatrix * gl_Normal);
+  intensity = min(max(dot(normalize(light_position), normal), 0.2), 0.9);
+}
+
+"""
+
 
 class VoxelApp(voxel.app.App):
     def __init__(self):
@@ -39,12 +70,23 @@ class VoxelApp(voxel.app.App):
                 resolution: 100.0
                 linear_speed: 20.0
                 angular_speed: 0.02617993877
-            shaders:
-                vertex: ['basic.vert']
-                fragment: ['basic.frag']
             """))
 
-        super(VoxelApp, self).__init__(config)
+
+        # Create shader program
+        program = voxel.core.ShaderProgram()
+        program.compile_vertex_shader(vertex_shader)
+        program.compile_fragment_shader(fragment_shader)
+        program.build()
+
+        # Define the window using configuration information
+        window = config.app.window
+
+        # Create the renderer
+        renderer = voxel.core.Renderer(program, (window.width, window.height))
+
+        super(VoxelApp, self).__init__(config, renderer)
+
         self.add_point(0, 0, 0, voxel.core.Color(1,1,1,1))
 
 def main():
