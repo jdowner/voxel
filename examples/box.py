@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 
 import argparse
+import logging
 import sys
+
+log = logging.getLogger('voxel.examples.box')
 
 from OpenGL.GL import (
         glGetString,
@@ -72,7 +75,6 @@ class VoxelApp(voxel.app.App):
                 angular_speed: 0.02617993877
             """))
 
-
         # Create shader program
         program = voxel.core.ShaderProgram()
         program.compile_vertex_shader(vertex_shader)
@@ -120,10 +122,10 @@ def main():
     glutMotionFunc(a.mouse_move)
 
     # Log diagnostic information
-    voxel.core.log.debug("GL_RENDERER   = %s" % (glGetString(GL_RENDERER),))
-    voxel.core.log.debug("GL_VERSION    = %s" % (glGetString(GL_VERSION),))
-    voxel.core.log.debug("GL_VENDOR     = %s" % (glGetString(GL_VENDOR),))
-    voxel.core.log.debug("GL_EXTENSIONS = ")
+    log.debug("GL_RENDERER   = %s" % (glGetString(GL_RENDERER),))
+    log.debug("GL_VERSION    = %s" % (glGetString(GL_VERSION),))
+    log.debug("GL_VENDOR     = %s" % (glGetString(GL_VENDOR),))
+    log.debug("GL_EXTENSIONS = ")
     for ext in sorted(glGetString(GL_EXTENSIONS).split()):
         voxel.core.log.debug("  %s" % (ext,))
 
