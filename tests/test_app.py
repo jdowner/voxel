@@ -1,6 +1,6 @@
 import unittest
 
-from app import Config
+from voxel.app import Config
 
 class TestConfig(unittest.TestCase):
     def setUp(self):

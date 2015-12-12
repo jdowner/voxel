@@ -1,22 +1,9 @@
 #!/usr/bin/python2
 
-import logging
 import math
 import sys
-import random
 
-import numpy
-import OpenGL
-OpenGL.ERROR_ON_COPY = True
-
-from OpenGL.arrays import vbo
-from OpenGL.GL import *
-from OpenGL.GLUT import *
-
-# PyOpenGL 3.0.1 introduces this convenience module...
-import OpenGL.GL.shaders as glsl
-
-import core
+from . import core
 
 
 def bindable(func):
@@ -34,7 +21,8 @@ class App(object):
     the high level functions that allow a user to interact with the scene.
     """
 
-    def __init__(self, config):
+    def __init__(self, config, renderer):
+        self._renderer = renderer
         self._keys = self._create_key_bindings(config)
 
         self._resolution = config.app.resolution
@@ -44,12 +32,6 @@ class App(object):
         self._last_mouse_press = None
         self._last_orientation = None
         self._key_pressed = None
-
-        # Build the shader program so that the renderer can be created.
-        window = config.app.window
-        shaders = config.shaders
-        program = self._create_shader_program(shaders.vertex, shaders.fragment)
-        self._renderer = core.Renderer(program, (window.width, window.height))
 
     @property
     def renderer(self):
@@ -103,24 +85,6 @@ class App(object):
             bindings[keymap[key]] = getattr(self, func)
 
         return bindings
-
-    def _create_shader_program(self, vertex_shaders, fragment_shaders):
-        """
-        Creates a shader program from the provided shaders, which are lists of
-        paths to the vertex and fragment shaders respectively.
-
-        """
-        program = core.ShaderProgram()
-
-        for shader in vertex_shaders:
-            program.load_vertex_shader(shader)
-
-        for shader in fragment_shaders:
-            program.load_fragment_shader(shader)
-
-        program.build()
-
-        return program
  
     def add_point(self, x, y, z, c):
         """

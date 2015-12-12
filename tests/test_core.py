@@ -3,7 +3,7 @@ import unittest
 
 import numpy
 
-from core import (Camera, Quaternion)
+from voxel.core import (Camera, Quaternion)
 
 class TestQuaternion(unittest.TestCase):
     def setUp(self):
