@@ -1,6 +1,9 @@
 import itertools
-import sys
+import logging
 import math
+import sys
+
+log = logging.getLogger(__name__)
 
 import numpy
 import OpenGL
