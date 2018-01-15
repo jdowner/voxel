@@ -5,6 +5,8 @@ import sys
 
 from . import core
 
+from OpenGL.GLUT import *
+
 
 def bindable(func):
     """
