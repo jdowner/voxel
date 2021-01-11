@@ -23,11 +23,12 @@ class Renderer(object):
 
     """
 
-    def __init__(self, program, (width, height)):
+    def __init__(self, program, size):
         """
         Creates a renderer using the provided shader program and window size.
 
         """
+        width, height = size
         self._program = program
         self._voxels = []
         self._vbo_voxels = None
@@ -376,13 +377,12 @@ class Frustum(object):
         """
         return self._fov
 
-    def resize(self, (width, height)):
+    def resize(self, size):
         """
         Resizes the frustum using the provided dimensions.
 
         """
-        self._width = width
-        self._height = height
+        self._width, self._height = size
 
         half_width = self.width / 2.0
         half_height = self.height / 2.0
@@ -805,11 +805,12 @@ class Quaternion(object):
 
         return R
 
-    def rotate(self, (x, y, z)):
+    def rotate(self, point):
         """
         Rotates a vector by this quaternion and returns the result.
 
         """
+        x, y, z = point
         q = self * Quaternion(0, x, y, z) * self.inverted()
         return map(float, q.axis())
 
