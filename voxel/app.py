@@ -84,7 +84,7 @@ class App(object):
             if not hasattr(method, 'bindable'):
                 raise ValueError('%s is not a bindable function' % (func,))
 
-            bindings[keymap[key]] = getattr(self, func)
+            bindings[keymap[key].encode("utf-8")] = getattr(self, func)
 
         return bindings
  
