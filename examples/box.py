@@ -4,15 +4,15 @@ import argparse
 import logging
 import sys
 
-log = logging.getLogger('voxel.examples.box')
+log = logging.getLogger("voxel.examples.box")
 
 from OpenGL.GL import (
-        glGetString,
-        GL_RENDERER,
-        GL_VERSION,
-        GL_VENDOR,
-        GL_EXTENSIONS,
-        )
+    glGetString,
+    GL_RENDERER,
+    GL_VERSION,
+    GL_VENDOR,
+    GL_EXTENSIONS,
+)
 
 from OpenGL.GLUT import *
 
@@ -93,18 +93,19 @@ class VoxelApp(voxel.app.App):
 
         super(VoxelApp, self).__init__(config, renderer)
 
-        self.add_point(0, 0, 0, voxel.core.Color(1,1,1,1))
+        self.add_point(0, 0, 0, voxel.core.Color(1, 1, 1, 1))
+
 
 def main():
     # Parse command line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('-v', '--verbose', action='store_true', default=False)
+    parser.add_argument("-v", "--verbose", action="store_true", default=False)
 
     args = parser.parse_args()
 
     if args.verbose:
         level = logging.DEBUG if args.verbose else logging.ERROR
-        logging.getLogger('voxel').setLevel(level)
+        logging.getLogger("voxel").setLevel(level)
 
     # Initialize the window
     glutInit(sys.argv)
@@ -134,6 +135,7 @@ def main():
         voxel.core.log.debug("  %s" % (ext,))
 
     glutMainLoop()
+
 
 if __name__ == "__main__":
     main()

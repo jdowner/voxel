@@ -5,7 +5,7 @@ import sys
 
 from . import core
 
-from OpenGL.GLUT import *
+from OpenGL.GLUT import *  # noqa
 
 
 def bindable(func):
@@ -75,19 +75,19 @@ class App(object):
         bindings = {}
         for key, func in config.app.bindings.items():
             if key not in keymap:
-                raise ValueError('Unrecognized key -- %s' % (key,))
+                raise ValueError("Unrecognized key -- %s" % (key,))
 
             if not hasattr(self, func):
-                raise ValueError('Unrecognized binding -- %s' % (func,))
+                raise ValueError("Unrecognized binding -- %s" % (func,))
 
             method = getattr(self, func)
-            if not hasattr(method, 'bindable'):
-                raise ValueError('%s is not a bindable function' % (func,))
+            if not hasattr(method, "bindable"):
+                raise ValueError("%s is not a bindable function" % (func,))
 
             bindings[keymap[key].encode("utf-8")] = getattr(self, func)
 
         return bindings
- 
+
     def add_point(self, x, y, z, c):
         """
         Add a point to renderer. The point will be re-mapped to a 3D lattice
@@ -334,57 +334,57 @@ class Config(object):
 
 
 keymap = {
-        'key_escape': '\x1b',
-        'key_a': 'a',
-        'key_b': 'b',
-        'key_c': 'c',
-        'key_d': 'd',
-        'key_e': 'e',
-        'key_f': 'f',
-        'key_g': 'g',
-        'key_h': 'h',
-        'key_i': 'i',
-        'key_j': 'j',
-        'key_k': 'k',
-        'key_l': 'l',
-        'key_m': 'm',
-        'key_n': 'n',
-        'key_o': 'o',
-        'key_p': 'p',
-        'key_q': 'q',
-        'key_r': 'r',
-        'key_s': 's',
-        'key_t': 't',
-        'key_u': 'u',
-        'key_v': 'v',
-        'key_w': 'w',
-        'key_x': 'x',
-        'key_y': 'y',
-        'key_z': 'z',
-        'key_A': 'A',
-        'key_B': 'B',
-        'key_C': 'C',
-        'key_D': 'D',
-        'key_E': 'E',
-        'key_F': 'F',
-        'key_G': 'G',
-        'key_H': 'H',
-        'key_I': 'I',
-        'key_J': 'J',
-        'key_K': 'K',
-        'key_L': 'L',
-        'key_M': 'M',
-        'key_N': 'N',
-        'key_O': 'O',
-        'key_P': 'P',
-        'key_Q': 'Q',
-        'key_R': 'R',
-        'key_S': 'S',
-        'key_T': 'T',
-        'key_U': 'U',
-        'key_V': 'V',
-        'key_W': 'W',
-        'key_X': 'X',
-        'key_Y': 'Y',
-        'key_Z': 'Z',
-   }
+    "key_escape": "\x1b",
+    "key_a": "a",
+    "key_b": "b",
+    "key_c": "c",
+    "key_d": "d",
+    "key_e": "e",
+    "key_f": "f",
+    "key_g": "g",
+    "key_h": "h",
+    "key_i": "i",
+    "key_j": "j",
+    "key_k": "k",
+    "key_l": "l",
+    "key_m": "m",
+    "key_n": "n",
+    "key_o": "o",
+    "key_p": "p",
+    "key_q": "q",
+    "key_r": "r",
+    "key_s": "s",
+    "key_t": "t",
+    "key_u": "u",
+    "key_v": "v",
+    "key_w": "w",
+    "key_x": "x",
+    "key_y": "y",
+    "key_z": "z",
+    "key_A": "A",
+    "key_B": "B",
+    "key_C": "C",
+    "key_D": "D",
+    "key_E": "E",
+    "key_F": "F",
+    "key_G": "G",
+    "key_H": "H",
+    "key_I": "I",
+    "key_J": "J",
+    "key_K": "K",
+    "key_L": "L",
+    "key_M": "M",
+    "key_N": "N",
+    "key_O": "O",
+    "key_P": "P",
+    "key_Q": "Q",
+    "key_R": "R",
+    "key_S": "S",
+    "key_T": "T",
+    "key_U": "U",
+    "key_V": "V",
+    "key_W": "W",
+    "key_X": "X",
+    "key_Y": "Y",
+    "key_Z": "Z",
+}

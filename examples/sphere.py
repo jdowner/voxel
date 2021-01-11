@@ -7,15 +7,15 @@ import math
 import random
 import sys
 
-log = logging.getLogger('voxel.examples.sphere')
+log = logging.getLogger("voxel.examples.sphere")
 
 from OpenGL.GL import (
-        glGetString,
-        GL_RENDERER,
-        GL_VERSION,
-        GL_VENDOR,
-        GL_EXTENSIONS,
-        )
+    glGetString,
+    GL_RENDERER,
+    GL_VERSION,
+    GL_VENDOR,
+    GL_EXTENSIONS,
+)
 
 from OpenGL.GLUT import *
 
@@ -110,20 +110,20 @@ class VoxelApp(voxel.app.App):
                 points.add((u * x, v * y, w * z))
 
         for x, y, z in points:
-            c = voxel.core.Color(1,1,1,1)
+            c = voxel.core.Color(1, 1, 1, 1)
             self.add_point(x, y, z, c)
 
 
 def main():
     # Parse command line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('-v', '--verbose', action='store_true', default=False)
+    parser.add_argument("-v", "--verbose", action="store_true", default=False)
 
     args = parser.parse_args()
 
     if args.verbose:
         level = logging.DEBUG if args.verbose else logging.ERROR
-        logging.getLogger('voxel').setLevel(level)
+        logging.getLogger("voxel").setLevel(level)
 
     # Initialize the window
     glutInit(sys.argv)
@@ -153,6 +153,7 @@ def main():
         log.debug("  %s" % (ext,))
 
     glutMainLoop()
+
 
 if __name__ == "__main__":
     main()

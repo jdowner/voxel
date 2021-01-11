@@ -3,18 +3,17 @@ import logging
 import math
 import sys
 
-log = logging.getLogger(__name__)
-
 import numpy
 import OpenGL
-OpenGL.ERROR_ON_COPY = True
 
+OpenGL.ERROR_ON_COPY = True
 from OpenGL.arrays import vbo
 from OpenGL.GL import *
 from OpenGL.GLUT import *
-
-# PyOpenGL 3.0.1 introduces this convenience module...
 import OpenGL.GL.shaders as glsl
+
+
+log = logging.getLogger(__name__)
 
 
 class Renderer(object):
@@ -34,9 +33,8 @@ class Renderer(object):
         self._vbo_voxels = None
         self._frustum = Frustum(width, height, 5000, 25.0)
         self._camera = Camera()
-        self._camera.position = numpy.array([0,0,5000])
-        self._camera.orientation = Quaternion.from_axis_angle(
-                numpy.array([0, 1, 0]), 0)
+        self._camera.position = numpy.array([0, 0, 5000])
+        self._camera.orientation = Quaternion.from_axis_angle(numpy.array([0, 1, 0]), 0)
         self._clear_color = Color(0.3, 0.3, 0.3, 1.0)
 
         self.resize(width, height)
@@ -97,7 +95,7 @@ class Renderer(object):
 
         hues = (c / 10.0 for c in range(1, 10))
         colors = [Color.from_hsv(hue, 0.5, 0.95) for hue in hues]
-        centers = [x for x in itertools.product([-sep,0,sep], repeat=3)]
+        centers = [x for x in itertools.product([-sep, 0, sep], repeat=3)]
         for center, color in zip(centers, colors):
             glPushMatrix()
             glTranslate(*center)
@@ -241,8 +239,8 @@ class ShaderProgram(object):
             loc, shader, errcode = e.args
             log.error("%s" % (errcode,))
             log.error("%s" % (loc,))
-            for number, line in enumerate(shader[0].split('\r\n')):
-                log.error('%d: %s' % (number, line))
+            for number, line in enumerate(shader[0].split("\r\n")):
+                log.error("%d: %s" % (number, line))
             sys.exit(1)
 
     def load_fragment_shader(self, filename):
@@ -258,13 +256,15 @@ class ShaderProgram(object):
 
         """
         try:
-            self._fragment_shaders.append(glsl.compileShader(shader, GL_FRAGMENT_SHADER))
+            self._fragment_shaders.append(
+                glsl.compileShader(shader, GL_FRAGMENT_SHADER)
+            )
         except RuntimeError as e:
             loc, shader, errcode = e.args
             log.error("%s" % (errcode,))
             log.error("%s" % (loc,))
-            for number, line in enumerate(shader[0].split('\r\n')):
-                log.error('%d: %s' % (number, line))
+            for number, line in enumerate(shader[0].split("\r\n")):
+                log.error("%d: %s" % (number, line))
             sys.exit(1)
 
     def build(self):
@@ -294,7 +294,7 @@ class ShaderProgram(object):
         glValidateProgram(self._program)
         if not glGetProgramiv(self._program, GL_VALIDATE_STATUS):
             info = glGetProgramInfoLog(self._program)
-            raise RuntimeError('Invalid program: %s' % (info,))
+            raise RuntimeError("Invalid program: %s" % (info,))
 
         # Find all of the active uniform variables in the program and bind them
         # to this object. This provides a nice interface for setting the uniform
@@ -390,8 +390,9 @@ class Frustum(object):
 
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
-        glFrustum(-half_width, half_width, -half_height, half_height, self.near,
-                self.far)
+        glFrustum(
+            -half_width, half_width, -half_height, half_height, self.near, self.far
+        )
 
 
 class Camera(object):
@@ -400,10 +401,11 @@ class Camera(object):
     """
 
     def __init__(self):
-        self._basis = numpy.diag((1.0,1.0,1.0))
+        self._basis = numpy.diag((1.0, 1.0, 1.0))
         self._orientation = Quaternion.from_axis_angle(
-                numpy.array([0.0, 1.0, 0.0]), 0.0)
-        self._position = numpy.array([0,0,0], dtype=numpy.float32)
+            numpy.array([0.0, 1.0, 0.0]), 0.0
+        )
+        self._position = numpy.array([0, 0, 0], dtype=numpy.float32)
 
     @property
     def position(self):
@@ -443,7 +445,7 @@ class Camera(object):
         The 'up' vector of the camera in world co-ordinates.
 
         """
-        return numpy.array(self._orientation.rotate(self._basis[:,1]))
+        return numpy.array(self._orientation.rotate(self._basis[:, 1]))
 
     @property
     def down(self):
@@ -459,7 +461,7 @@ class Camera(object):
         The 'forward' vector of the camera in world co-ordinates.
 
         """
-        return -numpy.array(self._orientation.rotate(self._basis[:,2]))
+        return -numpy.array(self._orientation.rotate(self._basis[:, 2]))
 
     @property
     def backward(self):
@@ -475,7 +477,7 @@ class Camera(object):
         The 'left' vector of the camera in world co-ordinates.
 
         """
-        return -numpy.array(self._orientation.rotate(self._basis[:,0]))
+        return -numpy.array(self._orientation.rotate(self._basis[:, 0]))
 
     @property
     def right(self):
@@ -490,7 +492,9 @@ class Camera(object):
         Rotates the pitch of the camera (radians).
 
         """
-        self._orientation = Quaternion.from_axis_angle(self.right, angle) * self._orientation
+        self._orientation = (
+            Quaternion.from_axis_angle(self.right, angle) * self._orientation
+        )
         self._orientation.normalize()
 
     def roll(self, angle):
@@ -498,7 +502,9 @@ class Camera(object):
         Rotates the roll of the camera (radians).
 
         """
-        self._orientation = Quaternion.from_axis_angle(self.forward, angle) * self._orientation
+        self._orientation = (
+            Quaternion.from_axis_angle(self.forward, angle) * self._orientation
+        )
         self._orientation.normalize()
 
     def yaw(self, angle):
@@ -506,7 +512,9 @@ class Camera(object):
         Rotates the yaw of the camera (radians).
 
         """
-        self._orientation = Quaternion.from_axis_angle(self.up, angle) * self._orientation
+        self._orientation = (
+            Quaternion.from_axis_angle(self.up, angle) * self._orientation
+        )
         self._orientation.normalize()
 
     def move_forward(self, distance):
@@ -562,7 +570,7 @@ class Quaternion(object):
         Creates a quaternion.
 
         """
-        self._data = numpy.array([w, x, y, z], dtype = numpy.float32)
+        self._data = numpy.array([w, x, y, z], dtype=numpy.float32)
 
     def __iadd__(self, q):
         """
@@ -793,16 +801,16 @@ class Quaternion(object):
         y = self.y
         z = self.z
 
-        R = numpy.zeros((3,3))
-        R[0,0] = 1.0 - 2.0 * (y * y + z * z)
-        R[1,1] = 1.0 - 2.0 * (x * x + z * z)
-        R[2,2] = 1.0 - 2.0 * (x * x + y * y)
-        R[0,1] = 2.0 * (x * y + w * z)
-        R[0,2] = 2.0 * (x * z - w * y)
-        R[1,2] = 2.0 * (y * z + w * x)
-        R[1,0] = 2.0 * (x * y - w * z)
-        R[2,0] = 2.0 * (x * z + w * y)
-        R[2,1] = 2.0 * (y * z - w * x)
+        R = numpy.zeros((3, 3))
+        R[0, 0] = 1.0 - 2.0 * (y * y + z * z)
+        R[1, 1] = 1.0 - 2.0 * (x * x + z * z)
+        R[2, 2] = 1.0 - 2.0 * (x * x + y * y)
+        R[0, 1] = 2.0 * (x * y + w * z)
+        R[0, 2] = 2.0 * (x * z - w * y)
+        R[1, 2] = 2.0 * (y * z + w * x)
+        R[1, 0] = 2.0 * (x * y - w * z)
+        R[2, 0] = 2.0 * (x * z + w * y)
+        R[2, 1] = 2.0 * (y * z - w * x)
 
         return R
 
@@ -944,37 +952,35 @@ class Voxel(object):
     rendering.
     """
 
-    OFFSETS = numpy.array([
-                [+1, -1, -1, +1, 0, 0, 0, 0, 0, 0],
-                [+1, +1, -1, +1, 0, 0, 0, 0, 0, 0],
-                [+1, +1, +1, +1, 0, 0, 0, 0, 0, 0],
-                [+1, -1, +1, +1, 0, 0, 0, 0, 0, 0],
-
-                [+1, -1, +1, 0, 0, +1, 0, 0, 0, 0],
-                [+1, +1, +1, 0, 0, +1, 0, 0, 0, 0],
-                [-1, +1, +1, 0, 0, +1, 0, 0, 0, 0],
-                [-1, -1, +1, 0, 0, +1, 0, 0, 0, 0],
-
-                [+1, +1, +1, 0, +1, 0, 0, 0, 0, 0],
-                [+1, +1, -1, 0, +1, 0, 0, 0, 0, 0],
-                [-1, +1, -1, 0, +1, 0, 0, 0, 0, 0],
-                [-1, +1, +1, 0, +1, 0, 0, 0, 0, 0],
-
-                [-1, -1, +1, -1, 0, 0, 0, 0, 0, 0],
-                [-1, +1, +1, -1, 0, 0, 0, 0, 0, 0],
-                [-1, +1, -1, -1, 0, 0, 0, 0, 0, 0],
-                [-1, -1, -1, -1, 0, 0, 0, 0, 0, 0],
-
-                [-1, -1, -1, 0, 0, -1, 0, 0, 0, 0],
-                [-1, +1, -1, 0, 0, -1, 0, 0, 0, 0],
-                [+1, +1, -1, 0, 0, -1, 0, 0, 0, 0],
-                [+1, -1, -1, 0, 0, -1, 0, 0, 0, 0],
-
-                [-1, -1, +1, 0, -1, 0, 0, 0, 0, 0],
-                [-1, -1, -1, 0, -1, 0, 0, 0, 0, 0],
-                [+1, -1, -1, 0, -1, 0, 0, 0, 0, 0],
-                [+1, -1, +1, 0, -1, 0, 0, 0, 0, 0],
-                ], dtype = numpy.float32)
+    OFFSETS = numpy.array(
+        [
+            [+1, -1, -1, +1, 0, 0, 0, 0, 0, 0],
+            [+1, +1, -1, +1, 0, 0, 0, 0, 0, 0],
+            [+1, +1, +1, +1, 0, 0, 0, 0, 0, 0],
+            [+1, -1, +1, +1, 0, 0, 0, 0, 0, 0],
+            [+1, -1, +1, 0, 0, +1, 0, 0, 0, 0],
+            [+1, +1, +1, 0, 0, +1, 0, 0, 0, 0],
+            [-1, +1, +1, 0, 0, +1, 0, 0, 0, 0],
+            [-1, -1, +1, 0, 0, +1, 0, 0, 0, 0],
+            [+1, +1, +1, 0, +1, 0, 0, 0, 0, 0],
+            [+1, +1, -1, 0, +1, 0, 0, 0, 0, 0],
+            [-1, +1, -1, 0, +1, 0, 0, 0, 0, 0],
+            [-1, +1, +1, 0, +1, 0, 0, 0, 0, 0],
+            [-1, -1, +1, -1, 0, 0, 0, 0, 0, 0],
+            [-1, +1, +1, -1, 0, 0, 0, 0, 0, 0],
+            [-1, +1, -1, -1, 0, 0, 0, 0, 0, 0],
+            [-1, -1, -1, -1, 0, 0, 0, 0, 0, 0],
+            [-1, -1, -1, 0, 0, -1, 0, 0, 0, 0],
+            [-1, +1, -1, 0, 0, -1, 0, 0, 0, 0],
+            [+1, +1, -1, 0, 0, -1, 0, 0, 0, 0],
+            [+1, -1, -1, 0, 0, -1, 0, 0, 0, 0],
+            [-1, -1, +1, 0, -1, 0, 0, 0, 0, 0],
+            [-1, -1, -1, 0, -1, 0, 0, 0, 0, 0],
+            [+1, -1, -1, 0, -1, 0, 0, 0, 0, 0],
+            [+1, -1, +1, 0, -1, 0, 0, 0, 0, 0],
+        ],
+        dtype=numpy.float32,
+    )
 
     def __init__(self, x, y, z, hx, hy, hz, r, g, b, a):
         """
@@ -986,10 +992,9 @@ class Voxel(object):
         scale = numpy.array([hx, hy, hz, 1, 1, 1, 1, 1, 1, 1], dtype=numpy.float32)
         shift = numpy.array([x, y, z, 0, 0, 0, r, g, b, a], dtype=numpy.float32)
 
-        product = numpy.multiply(Voxel.OFFSETS, scale[numpy.newaxis,:])
+        product = numpy.multiply(Voxel.OFFSETS, scale[numpy.newaxis, :])
 
-        self._vertices = numpy.add(product, shift[numpy.newaxis,:])
-
+        self._vertices = numpy.add(product, shift[numpy.newaxis, :])
 
     @property
     def vertices(self):
