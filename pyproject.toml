@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "voxel"
+version = "0.1.0"
+description = ""
+authors = ["Joshua Downer <joshua.downer@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+PyOpenGL = "^3.1.5"
+numpy = "^1.19.5"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2.1"
+pytest-black = "^0.3.12"
+pytest-flake8 = "^1.0.7"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
