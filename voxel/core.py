@@ -812,7 +812,7 @@ class Quaternion(object):
         """
         x, y, z = point
         q = self * Quaternion(0, x, y, z) * self.inverted()
-        return map(float, q.axis())
+        return [float(v) for v in q.axis()]
 
 
 class Color(object):
