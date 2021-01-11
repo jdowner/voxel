@@ -7,15 +7,15 @@ import math
 import random
 import sys
 
-log = logging.getLogger('voxel.examples.sphere')
+log = logging.getLogger("voxel.examples.sphere")
 
 from OpenGL.GL import (
-        glGetString,
-        GL_RENDERER,
-        GL_VERSION,
-        GL_VENDOR,
-        GL_EXTENSIONS,
-        )
+    glGetString,
+    GL_RENDERER,
+    GL_VERSION,
+    GL_VENDOR,
+    GL_EXTENSIONS,
+)
 
 from OpenGL.GLUT import *
 
@@ -58,7 +58,9 @@ void main()
 
 class VoxelApp(voxel.app.App):
     def __init__(self):
-        config = voxel.app.Config(yaml.load("""
+        config = voxel.app.Config(
+            yaml.safe_load(
+                """
             app:
                 window:
                     height: 600
@@ -76,7 +78,9 @@ class VoxelApp(voxel.app.App):
                 resolution: 20.0
                 linear_speed: 20.0
                 angular_speed: 0.02617993877
-            """))
+            """
+            )
+        )
 
         # Create shader program
         program = voxel.core.ShaderProgram()
@@ -95,7 +99,7 @@ class VoxelApp(voxel.app.App):
         points = set()
 
         r = 1000.0
-        for _ in xrange(10000):
+        for _ in range(10000):
             x = random.random()
             y = random.random()
             h = 1.0 - x * x - y * y
@@ -106,20 +110,20 @@ class VoxelApp(voxel.app.App):
                 points.add((u * x, v * y, w * z))
 
         for x, y, z in points:
-            c = voxel.core.Color(1,1,1,1)
+            c = voxel.core.Color(1, 1, 1, 1)
             self.add_point(x, y, z, c)
 
 
 def main():
     # Parse command line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('-v', '--verbose', action='store_true', default=False)
+    parser.add_argument("-v", "--verbose", action="store_true", default=False)
 
     args = parser.parse_args()
 
     if args.verbose:
         level = logging.DEBUG if args.verbose else logging.ERROR
-        logging.getLogger('voxel').setLevel(level)
+        logging.getLogger("voxel").setLevel(level)
 
     # Initialize the window
     glutInit(sys.argv)
@@ -149,6 +153,7 @@ def main():
         log.debug("  %s" % (ext,))
 
     glutMainLoop()
+
 
 if __name__ == "__main__":
     main()

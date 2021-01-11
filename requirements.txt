@@ -1,0 +1,3 @@
+pyopengl
+numpy
+pyyaml
