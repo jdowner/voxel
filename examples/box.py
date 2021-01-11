@@ -55,7 +55,9 @@ void main()
 
 class VoxelApp(voxel.app.App):
     def __init__(self):
-        config = voxel.app.Config(yaml.load("""
+        config = voxel.app.Config(
+            yaml.safe_load(
+                """
             app:
                 window:
                     height: 600
@@ -73,7 +75,9 @@ class VoxelApp(voxel.app.App):
                 resolution: 100.0
                 linear_speed: 20.0
                 angular_speed: 0.02617993877
-            """))
+            """
+            )
+        )
 
         # Create shader program
         program = voxel.core.ShaderProgram()
