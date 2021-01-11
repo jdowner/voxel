@@ -165,7 +165,7 @@ class Renderer(object):
                         glDisableClientState(GL_VERTEX_ARRAY)
                         glDisableClientState(GL_NORMAL_ARRAY)
                         glDisableClientState(GL_COLOR_ARRAY)
-            except:
+            except Exception:
                 # @todo need to print out the relevant information and terminate
                 # execution.
                 raise

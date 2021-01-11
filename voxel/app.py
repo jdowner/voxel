@@ -307,7 +307,7 @@ class Config(object):
         for k, v in datadict.items():
             try:
                 setattr(self, k, Config(v))
-            except:
+            except Exception:
                 setattr(self, k, v)
 
     def __repr__(self):
