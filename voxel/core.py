@@ -306,10 +306,11 @@ class ShaderProgram(object):
 
             # @todo support for data types
             if dtype == GL_FLOAT_VEC3:
+
                 def set_uniform_3f(x, y, z):
                     glUniform3f(location, x, y, z)
 
-                setattr(self, name, set_uniform_3f)
+                setattr(self, name.decode("utf-8"), set_uniform_3f)
 
 
 class Frustum(object):
