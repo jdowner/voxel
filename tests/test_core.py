@@ -148,7 +148,7 @@ class TestCamera(unittest.TestCase):
         self.camera.move_right(1.0)
         self.camera.move_up(1.0)
 
-        for _ in xrange(27):
+        for _ in range(27):
             self.camera.yaw(math.pi / 12.0)
 
         self.camera.move_right(math.sqrt(2.0))

@@ -99,7 +99,7 @@ class VoxelApp(voxel.app.App):
         points = set()
 
         r = 1000.0
-        for _ in xrange(10000):
+        for _ in range(10000):
             x = random.random()
             y = random.random()
             h = 1.0 - x * x - y * y

@@ -94,7 +94,7 @@ class Renderer(object):
         length = 20
         sep = 100
 
-        hues = (c / 10.0 for c in xrange(1,10))
+        hues = (c / 10.0 for c in range(1, 10))
         colors = [Color.from_hsv(hue, 0.5, 0.95) for hue in hues]
         centers = [x for x in itertools.product([-sep,0,sep], repeat=3)]
         for center, color in zip(centers, colors):
@@ -299,7 +299,7 @@ class ShaderProgram(object):
         # to this object. This provides a nice interface for setting the uniform
         # variables.
         num_active_uniforms = glGetProgramiv(self._program, GL_ACTIVE_UNIFORMS)
-        for index in xrange(num_active_uniforms):
+        for index in range(num_active_uniforms):
             name, _, dtype = glGetActiveUniform(self._program, index)
             location = glGetUniformLocation(self._program, name)
 
