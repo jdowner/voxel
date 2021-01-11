@@ -132,7 +132,7 @@ class App(object):
         Forces the program to exit.
 
         """
-        sys.exit(0)
+        glutLeaveMainLoop()
 
     @bindable
     def move_forward(self):
