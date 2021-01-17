@@ -30,12 +30,12 @@ varying float intensity;
 
 void main()
 {
-  vec4 color = gl_Color;
-  color.x = intensity * color.x;
-  color.y = intensity * color.y;
-  color.z = intensity * color.z;
+    vec4 color = gl_Color;
+    color.x = intensity * color.x;
+    color.y = intensity * color.y;
+    color.z = intensity * color.z;
 
-  gl_FragColor = color;
+    gl_FragColor = color;
 }
 """
 
@@ -46,11 +46,11 @@ varying float intensity;
 
 void main()
 {
-	gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
-	gl_FrontColor = gl_Color;
+    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+    gl_FrontColor = gl_Color;
 
-  normal = normalize(gl_NormalMatrix * gl_Normal);
-  intensity = min(max(dot(normalize(light_position), normal), 0.2), 0.9);
+    normal = normalize(gl_NormalMatrix * gl_Normal);
+    intensity = min(max(dot(normalize(light_position), normal), 0.2), 0.9);
 }
 
 """

@@ -6,7 +6,7 @@ import sys
 
 log = logging.getLogger("voxel.examples.box")
 
-from OpenGL.GL import (
+from OpenGL.GL import (  # noqa
     glGetString,
     GL_RENDERER,
     GL_VERSION,
@@ -14,12 +14,11 @@ from OpenGL.GL import (
     GL_EXTENSIONS,
 )
 
-from OpenGL.GLUT import *
+from OpenGL.GLUT import *  # noqa
 
-import yaml
-
-import voxel.core
 import voxel.app
+import voxel.core
+import yaml
 
 fragment_shader = """
 uniform vec3 light_position;
@@ -27,12 +26,12 @@ varying float intensity;
 
 void main()
 {
-  vec4 color = gl_Color;
-  color.x = intensity * color.x;
-  color.y = intensity * color.y;
-  color.z = intensity * color.z;
+    vec4 color = gl_Color;
+    color.x = intensity * color.x;
+    color.y = intensity * color.y;
+    color.z = intensity * color.z;
 
-  gl_FragColor = color;
+    gl_FragColor = color;
 }
 """
 
@@ -43,11 +42,11 @@ varying float intensity;
 
 void main()
 {
-	gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
-	gl_FrontColor = gl_Color;
+    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+    gl_FrontColor = gl_Color;
 
-  normal = normalize(gl_NormalMatrix * gl_Normal);
-  intensity = min(max(dot(normalize(light_position), normal), 0.2), 0.9);
+    normal = normalize(gl_NormalMatrix * gl_Normal);
+    intensity = min(max(dot(normalize(light_position), normal), 0.2), 0.9);
 }
 
 """

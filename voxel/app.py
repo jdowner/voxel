@@ -1,7 +1,6 @@
 #!/usr/bin/python2
 
 import math
-import sys
 
 from . import core
 

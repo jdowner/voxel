@@ -7,10 +7,10 @@ import numpy
 import OpenGL
 
 OpenGL.ERROR_ON_COPY = True
-from OpenGL.arrays import vbo
-from OpenGL.GL import *
-from OpenGL.GLUT import *
-import OpenGL.GL.shaders as glsl
+from OpenGL.arrays import vbo  # noqa
+from OpenGL.GL import *  # noqa
+from OpenGL.GLUT import *  # noqa
+import OpenGL.GL.shaders as glsl  # noqa
 
 
 log = logging.getLogger(__name__)
